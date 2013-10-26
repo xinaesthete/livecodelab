@@ -3,11 +3,7 @@
 
 (function (w) {
 
-    var LCLSoundSystem, soundprocess, sound, scriptNode, context, config;
-
-    config = {
-        buffersize: 2048
-    };
+    var LCLSoundSystem, soundprocess, sound, scriptNode, context, config, globalsampnum;
 
     $(document).ready(function () {
         sound = function (e) {
@@ -22,10 +18,18 @@
         };
 
         context = new AudioContext();
+        w.context = context;
+
+        config = {
+            buffersize: 2048,
+            samplerate: context.sampleRate
+        };
+
         scriptNode = context.createJavaScriptNode(config.buffersize, 0, 1);
 
         scriptNode.connect(context.destination);
         scriptNode.onaudioprocess = function (e) {
+            globalsampnum = context.currentTime * context.sampleRate;
             sound(e);
         };
     });
@@ -67,12 +71,26 @@
     LCLSoundSystem.prototype.oscillator = function (freq) {
 
         return function (samplenum) {
-            var i, audio;
+            var cyclesamples, cycleoffset, sampvalue, thisoffset, i, audio, x;
+
+            cyclesamples = config.samplerate / freq;
+            cycleoffset = globalsampnum % cyclesamples;
+
+            sampvalue = 1000 / cyclesamples;
+            thisoffset = sampvalue * cycleoffset;
+
+            console.log(cycleoffset);
+
+            x = thisoffset;
 
             audio = [];
 
             for (i = 0; i < samplenum; i += 1) {
-                audio[i] = (i / samplenum);
+                audio[i] = x / 1000;
+                x += sampvalue;
+                if (x > 1000) {
+                    x = 0;
+                }
             }
 
             return audio;
