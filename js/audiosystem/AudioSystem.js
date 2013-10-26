@@ -65,7 +65,6 @@
     // returns
     // The audio generation function
     LCLSoundSystem.prototype.oscillator = function (freq) {
-        var output;
 
         return function (samplenum) {
             var i, audio;
@@ -85,7 +84,7 @@
     // returns
     // The audio generation function
     LCLSoundSystem.prototype.filter = function (input) {
-        var output, lastsample;
+        var lastsample;
         lastsample = 0;
 
         return function (samplenum) {
@@ -141,7 +140,6 @@
     // returns
     // The audio generation function
     LCLSoundSystem.prototype.gain = function (gain, node) {
-        var output;
 
         return function (samplenum) {
             var i, inputdata, audio;
