@@ -64,6 +64,8 @@ startEnvironment = (paramsObject) ->
   # because it needs to be able to swap color names that it
   # finds as CSS color strings in the user program.
   colourNames = (new ColourLiterals()).colourNames
+
+  soundsystem = new LCLSoundSystem();
   
   #//////////////////////////////////////////////////////
   # Phase 2 - Initialise the core of livecodelab.

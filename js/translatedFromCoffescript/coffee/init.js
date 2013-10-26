@@ -26,7 +26,7 @@ isCanvasSupported = function() {
 };
 
 startEnvironment = function(paramsObject) {
-  var autocoder, bigCursor, colourNames, editor, editorDimmer, eventRouter, liveCodeLabCore, programLoader, stats, ui, urlRouter,
+  var autocoder, bigCursor, colourNames, editor, editorDimmer, eventRouter, liveCodeLabCore, programLoader, soundsystem, stats, ui, urlRouter,
     _this = this;
   if (!isCanvasSupported) {
     $("#noCanvasMessage").modal({
@@ -41,6 +41,7 @@ startEnvironment = function(paramsObject) {
   eventRouter = new EventRouter();
   stats = new Stats;
   colourNames = (new ColourLiterals()).colourNames;
+  soundsystem = new LCLSoundSystem();
   liveCodeLabCore = new LiveCodeLabCore({
     blendedThreeJsSceneCanvas: paramsObject.blendedThreeJsSceneCanvas,
     canvasForBackground: paramsObject.canvasForBackground,
