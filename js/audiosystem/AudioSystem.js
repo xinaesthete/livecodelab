@@ -1,5 +1,5 @@
 /*jslint browser: true */
-/*global AudioContext */
+/*global AudioContext, $ */
 
 'use strict';
 
@@ -11,26 +11,26 @@
         buffersize: 2048
     };
 
-    sound = function (e) {
+    $(document).ready(function () {
+        sound = function (e) {
 
-        var i, data;
-        data = e.outputBuffer.getChannelData(0);
+            var i, data;
+            data = e.outputBuffer.getChannelData(0);
 
-        for (i = 0; i < data.length; i += 1) {
-            data[i] = ((i % 100) / 100);
-        }
+            for (i = 0; i < data.length; i += 1) {
+                data[i] = 0;
+            }
 
-    };
+        };
 
-    context = new AudioContext();
-    scriptNode = context.createJavaScriptNode(config.buffersize, 0, 1);
+        context = new AudioContext();
+        scriptNode = context.createJavaScriptNode(config.buffersize, 0, 1);
 
-    scriptNode.connect(context.destination);
-    scriptNode.onaudioprocess = function (e) {
-        console.log('audioproc');
-        sound(e);
-    };
-
+        scriptNode.connect(context.destination);
+        scriptNode.onaudioprocess = function (e) {
+            sound(e);
+        };
+    });
 
     w.LCLSoundSystem = LCLSoundSystem = function () {
         w.oscillator = this.oscillator;
@@ -46,10 +46,7 @@
     // null
     LCLSoundSystem.prototype.out = function (node) {
 
-        console.log('outout');
         sound = function (e) {
-
-            console.log('callback');
 
             var i, data, output;
             data = e.outputBuffer.getChannelData(0);
