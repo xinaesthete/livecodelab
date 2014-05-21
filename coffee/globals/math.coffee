@@ -476,19 +476,20 @@ class Marsaglia
 
   constructor:(i1, i2) ->
     # from http://www.math.uni-bielefeld.de/~sillke/ALGORITHMS/random/marsaglia-c
-    z = i1 or 362436069
-    w = i2 or 521288629
+    @z = i1 or 362436069
+    @w = i2 or 521288629
 
   @createRandomized: ->
     now = new Date()
     new Marsaglia((now / 60000) & 0xFFFFFFFF, now & 0xFFFFFFFF)
 
   nextInt: ->
-    z = (36969 * (z & 65535) + (z >>> 16)) & 0xFFFFFFFF
-    w = (18000 * (w & 65535) + (w >>> 16)) & 0xFFFFFFFF
-    (((z & 0xFFFF) << 16) | (w & 0xFFFF)) & 0xFFFFFFFF
+    @z = (36969 * (@z & 65535) + (@z >>> 16)) & 0xFFFFFFFF
+    @w = (18000 * (@w & 65535) + (@w >>> 16)) & 0xFFFFFFFF
+    (((@z & 0xFFFF) << 16) | (@w & 0xFFFF)) & 0xFFFFFFFF
 
   nextDouble: ->
+    # randomSeed applies this function to global context where @nextInt is undefined
     i = @nextInt() / 4294967296
     (if i < 0 then 1 + i else i)
 
@@ -506,7 +507,7 @@ each time the software is run.
 @see noiseSeed
 ###
 randomSeed = (seed) ->
-  currentRandom = (new Marsaglia(seed)).nextDouble
+  currentRandom = ()->(new Marsaglia(seed)).nextDouble()
 
 
 # Random
@@ -532,7 +533,7 @@ Random = (seed) ->
     haveNextNextGaussian = true
     v1 * multiplier
 
-  
+
   # by default use standard random, otherwise seeded
   random = (if (seed is undefined) then Math.random else (new Marsaglia(seed)).nextDouble)
 
@@ -567,7 +568,7 @@ class PerlinNoise
       @perm[i + 256] = @perm[i]
       ++i
 
-  
+
   # copy to avoid taking mod in @perm[0];
   grad3d: (i, x, y, z) ->
     h = i & 15 # convert into 12 gradient directions
@@ -661,7 +662,7 @@ but this will differ depending on use.
 @see noiseDetail
 ###
 noise = (x, y, z) ->
-  
+
   # caching
   noiseProfile.generator = new PerlinNoise(noiseProfile.seed)  if noiseProfile.generator is undefined
   generator = noiseProfile.generator
