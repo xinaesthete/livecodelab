@@ -489,7 +489,6 @@ class Marsaglia
     (((@z & 0xFFFF) << 16) | (@w & 0xFFFF)) & 0xFFFFFFFF
 
   nextDouble: ->
-    # randomSeed applies this function to global context where @nextInt is undefined
     i = @nextInt() / 4294967296
     (if i < 0 then 1 + i else i)
 
@@ -507,7 +506,8 @@ each time the software is run.
 @see noiseSeed
 ###
 randomSeed = (seed) ->
-  currentRandom = ()->(new Marsaglia(seed)).nextDouble()
+  mrand = new Marsaglia(seed)
+  currentRandom = ()->mrand.nextDouble()
 
 
 # Random
