@@ -24,6 +24,9 @@ it's a live coding tool that artists can use, misuse and tweak. Go fullscreen, h
 *Auto-coding*:
 automatic coding in the browser is still quite a virgin territory. It's been done a lot with lisp-y languages, but not quite in the context of things like LiveCodeLab, so there is an opportunity to do quite some original work there.
 
+#### Evolutionary algorithms ####
+
+This fork of LiveCodeLab intends to add a *Mutator* interface, for defining 'genes' that can then be bred by the user...
 
 ### Roadmap ###
 
@@ -58,7 +61,7 @@ For a more fine-grained look at ideas and bugs, take a look at <a href="https://
 #### Documentation ####
 Please check the docs-overview file in the docs directory for an
 overview of the available documentation.
- 
+
 #### Glamour shots ####
 
 <img src="http://www.sketchpatch.net/labs/screenshots/thumbnails/LiveCodeLab-BannerForGithub.png" width="800" height="236">
