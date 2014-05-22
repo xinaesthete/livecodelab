@@ -262,6 +262,7 @@ define () ->
 
     resetFeedbackStack: ->
       @feedbackStack = []
+      @doFeedback = false
 
 
 
@@ -681,6 +682,7 @@ define () ->
     reset: ->
       @resetFillStack()
       @resetStrokeStack()
+      @resetFeedbackStack()
 
       @currentStrokeSize = 1
       @ballDetLevel =
