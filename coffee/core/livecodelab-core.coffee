@@ -68,6 +68,7 @@ define [
   ,'core/graphics-commands'
   ,'core/lights-commands'
   ,'core/matrix-commands'
+  ,'core/mutator-commands'
   ,'core/program-runner'
   ,'core/renderer'
   ,'core/threejs-system'
@@ -97,6 +98,7 @@ define [
   ,GraphicsCommands
   ,LightsCommands
   ,MatrixCommands
+  ,MutatorCommands
   ,ProgramRunner
   ,Renderer
   ,ThreeJsSystem
@@ -116,14 +118,14 @@ define [
   class LiveCodeLabCore
 
     constructor: (@paramsObject) ->
-      
+
       #//////////////////////////////////////////////
       #
       # ### Phase 1
       # initialise all the fields first
       #
       #//////////////////////////////////////////////
-      
+
       # three is a global defined in three.min.js and used in:
       # ShaderPass, ShaderExtras, SavePass, RenderPass, MaskPass
       # The difference between three and the threeJsSystem is that
@@ -137,7 +139,7 @@ define [
       # fields/methods. So, threeJsSystem provides some abstraction without
       # attempting to be a complete abstraction layer.
       @three = THREE
-      
+
       #//////////////////////////////////////////////
       #
       # ### Phase 2
@@ -150,20 +152,20 @@ define [
       # function we are in.
       #
       #//////////////////////////////////////////////
-      
+
       @timeKeeper = new TimeKeeper()
-      
+
       # this one also interacts with threeJsSystem at runtime
       @blendControls = new BlendControls(@)
       @colourFunctions = new ColourFunctions()
       @colourLiterals = new ColourLiterals()
-      
+
       # this one also interacts with threeJsSystem and blendControls at runtime
       @renderer = new Renderer(@)
       @soundSystem =
         new SoundSystem(
           @paramsObject.eventRouter, @timeKeeper, buzz, lowLag, createBowser(), new SampleBank(buzz))
-      
+
       # this one also interacts with colourFunctions, backgroundSceneContext,
       # canvasForBackground at runtime
       @backgroundPainter = new BackgroundPainter(
@@ -171,15 +173,15 @@ define [
         @,
         @colourLiterals
       )
-      
+
       # this one also interacts with codeCompiler at runtime.
       @drawFunctionRunner =
         new ProgramRunner(@paramsObject.eventRouter, @)
-      
+
       # compiles the user sketch to js so it's ready to run.
       @codeCompiler =
         new CodeCompiler(@paramsObject.eventRouter, @)
-      
+
       # this one also interacts with timeKeeper, matrixCommands, blendControls,
       #    soundSystem,
       #    backgroundPainter, graphicsCommands, lightSystem, drawFunctionRunner,
@@ -188,7 +190,7 @@ define [
       @animationLoop =
         new AnimationLoop(
           @paramsObject.eventRouter, @paramsObject.statsWidget, @)
-      
+
       #//////////////////////////////////////////////
       #
       # ### Phase 3
@@ -202,19 +204,21 @@ define [
       # is wrong.
       #
       #//////////////////////////////////////////////
-      
+
       # this one doesn't interact with any other part at runtime.
       @threeJsSystem =
         new ThreeJsSystem(
           Detector, THREEx, @paramsObject.blendedThreeJsSceneCanvas,
           @paramsObject.forceCanvasRenderer, @paramsObject.testMode,
           @three)
-      
+
       # this one interacts with timeKeeper at runtime
       @matrixCommands =
         new MatrixCommands(
           @three, @)
-      
+
+      @mutatorCommands = new MutatorCommands()
+
       # this one also interacts with colourFunctions, lightSystem, matrixCommands
       # threeJsSystem at runtime
       @graphicsCommands =
@@ -224,7 +228,7 @@ define [
           @colourLiterals)
           # color, lightSystem, matrixCommands, threeJsSystem, colorModeA,
           # redF, greenF, blueF, alphaZeroToOne
-      
+
       # this one also interacts with three,
       # threeJsSystem, colourFunctions at runtime
       @lightSystem =
@@ -251,6 +255,7 @@ define [
       @animationLoop.addToScope(@globalscope)
       @timeKeeper.addToScope(@globalscope)
       @drawFunctionRunner.addToScope(@globalscope)
+      @mutatorCommands.addToScope(@globalscope)
 
 
     #//////////////////////////////////////////////
@@ -288,7 +293,7 @@ define [
       if updatedCode isnt "" and @dozingOff
         @dozingOff = false
         @animationLoop.animate()
-        
+
         # console.log('waking up');
         @paramsObject.eventRouter.emit("livecodelab-waking-up")
 
@@ -331,4 +336,3 @@ define [
       img
 
   LiveCodeLabCore
-

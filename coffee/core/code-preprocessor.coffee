@@ -128,6 +128,8 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
       "noiseSeed"
       # Color
       "color"
+      # Mutator
+      "gene"
     ]
 
 
