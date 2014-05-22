@@ -455,14 +455,15 @@ define () ->
           if not pooledObjectWithMaterials.feedbackBasicMaterial?
             pooledObjectWithMaterials.feedbackBasicMaterial =
               new @liveCodeLabCore_three.MeshBasicMaterial()
-          pooledObjectWithMaterials.basicMaterial.color.setHex colorToBeUsed
           pooledObjectWithMaterials.feedbackBasicMaterial.map = @liveCodeLabCoreInstance.threeJsSystem.feedbackMap
           pooledObjectWithMaterials.feedbackBasicMaterial.color.setHex colorToBeUsed
           pooledObjectWithMaterials.threejsObject3D.material =
             pooledObjectWithMaterials.feedbackBasicMaterial
         # ////////
-        else pooledObjectWithMaterials.threejsObject3D.material =
-          pooledObjectWithMaterials.basicMaterial
+        else
+          pooledObjectWithMaterials.basicMaterial.color.setHex colorToBeUsed
+          pooledObjectWithMaterials.threejsObject3D.material = pooledObjectWithMaterials.basicMaterial
+
       else
 
         # lights are on
@@ -476,12 +477,12 @@ define () ->
         if feedbackToBeUsed
           pooledObjectWithMaterials.lambertMaterial.color.setHex colorToBeUsed
           pooledObjectWithMaterials.feedbackLambertMaterial.map = @liveCodeLabCoreInstance.threeJsSystem.feedbackMap
-          pooledObjectWithMaterials.feedbackLambertMaterial.color.setHex colorToBeUsed
           pooledObjectWithMaterials.threejsObject3D.material =
             pooledObjectWithMaterials.feedbackLambertMaterial
         # ////////
-        else pooledObjectWithMaterials.threejsObject3D.material =
-          pooledObjectWithMaterials.lambertMaterial
+        else
+          pooledObjectWithMaterials.feedbackLambertMaterial.color.setHex colorToBeUsed
+          pooledObjectWithMaterials.threejsObject3D.material = pooledObjectWithMaterials.lambertMaterial
 
       # not all of these properties apply in all cases (for example sidedness
       # doesn't apply to lines), but setting these properties in those cases
