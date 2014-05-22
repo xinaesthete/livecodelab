@@ -11,6 +11,7 @@ define [
 
     @isWebGLUsed: false
     @composer: {}
+    @feedbackMap: undefined
     constructor: ( \
       Detector, \
         THREEx, \
@@ -25,8 +26,8 @@ define [
         @blendedThreeJsSceneCanvas = document.createElement("canvas")
         @blendedThreeJsSceneCanvas.width = window.innerWidth
         @blendedThreeJsSceneCanvas.height = window.innerHeight
-    
-    
+
+
       if not @forceCanvasRenderer and Detector.webgl
         # Webgl init.
         # We allow for a bigger ball detail.
@@ -35,7 +36,7 @@ define [
         @ballDefaultDetLevel = 16
         @blendedThreeJsSceneCanvasContext =
           @blendedThreeJsSceneCanvas.getContext("experimental-webgl")
-        
+
         # see http://mrdoob.github.com/three.js/docs/53/#Reference/Renderers/WebGLRenderer
         @renderer = new liveCodeLabCore_three.WebGLRenderer(
           canvas: @blendedThreeJsSceneCanvas
@@ -54,16 +55,16 @@ define [
         # and postprocessing/shaders.
         @ballDefaultDetLevel = 6
         @currentFrameThreeJsSceneCanvas = document.createElement("canvas")
-        
+
         # some shorthands
         currentFrameThreeJsSceneCanvas = @currentFrameThreeJsSceneCanvas
-        
+
         currentFrameThreeJsSceneCanvas.width = @blendedThreeJsSceneCanvas.width
         currentFrameThreeJsSceneCanvas.height = @blendedThreeJsSceneCanvas.height
-        
+
         @currentFrameThreeJsSceneCanvasContext =
           currentFrameThreeJsSceneCanvas.getContext("2d")
-        
+
         @previousFrameThreeJSSceneRenderForBlendingCanvas =
           document.createElement("canvas")
         # some shorthands
@@ -73,51 +74,65 @@ define [
           @blendedThreeJsSceneCanvas.width
         previousFrameThreeJSSceneRenderForBlendingCanvas.height =
           @blendedThreeJsSceneCanvas.height
-        
+
         @previousFrameThreeJSSceneRenderForBlendingCanvasContext =
           @previousFrameThreeJSSceneRenderForBlendingCanvas.getContext("2d")
         @blendedThreeJsSceneCanvasContext =
           @blendedThreeJsSceneCanvas.getContext("2d")
-        
+
         # see http://mrdoob.github.com/three.js/docs/53/#Reference/Renderers/CanvasRenderer
         @renderer = new liveCodeLabCore_three.CanvasRenderer(
           canvas: currentFrameThreeJsSceneCanvas
           antialias: true # to get smoother output
           preserveDrawingBuffer: testMode # to allow screenshot
         )
-        
+
       @renderer.setSize @blendedThreeJsSceneCanvas.width, \
         @blendedThreeJsSceneCanvas.height
       @scene = new liveCodeLabCore_three.Scene()
       @scene.matrixAutoUpdate = false
-      
+
       # put a camera in the scene
       @camera = new liveCodeLabCore_three.PerspectiveCamera(35, \
         @blendedThreeJsSceneCanvas.width / \
         @blendedThreeJsSceneCanvas.height, 1, 10000)
       @camera.position.set 0, 0, 5
       @scene.add @camera
-      
+
       # transparently support window resize
       THREEx.WindowResize.bind @renderer, @camera
-      
+
       if @isWebGLUsed
         renderTargetParameters = undefined
         renderTarget = undefined
+        feedbackSaveTarget = undefined
         effectSaveTarget = undefined
         fxaaPass = undefined
+        feedbackSavePass = undefined
         screenPass = undefined
         renderModel = undefined
         renderTargetParameters =
-          format: liveCodeLabCore_three.RGBAFormat
+          format: liveCodeLabCore_three.RGBFormat #liveCodeLabCore_three.RGBAFormat
           stencilBuffer: true
-      
-        # these are the two buffers.
+
+        # these are the three buffers.
 
         renderTarget = new liveCodeLabCore_three.WebGLRenderTarget(
           @blendedThreeJsSceneCanvas.width,
           @blendedThreeJsSceneCanvas.height,
           renderTargetParameters)
+        renderTarget.generateMipmaps = false
+
+        feedbackSaveTarget = new liveCodeLabCore_three.SavePass(
+          new liveCodeLabCore_three.WebGLRenderTarget(
+            @blendedThreeJsSceneCanvas.width,
+            @blendedThreeJsSceneCanvas.height,
+            renderTargetParameters
+          )
+        )
+        feedbackSaveTarget.clear = false
+        feedbackSaveTarget.generateMipmaps = false
+        @feedbackMap = feedbackSaveTarget.renderTarget
 
         effectSaveTarget = new liveCodeLabCore_three.SavePass(
           new liveCodeLabCore_three.WebGLRenderTarget(
@@ -127,7 +142,9 @@ define [
           )
         )
         effectSaveTarget.clear = false
-        
+        effectSaveTarget.generateMipmaps = false
+
+
         # Uncomment the three lines containing "fxaaPass" below to try a fast
         # antialiasing filter. Commented below because of two reasons:
         # a) it's slow
@@ -136,13 +153,15 @@ define [
         # The problem of blending with black pixels is the same problem of the
         # motionBlur leaving a black trail - tracked in github with
         # https://github.com/davidedc/livecodelab/issues/22
-        
+
         #fxaaPass = new liveCodeLabCore_three.ShaderPass(liveCodeLabCore_three.ShaderExtras.fxaa);
         #fxaaPass.uniforms.resolution.value.set(1 / window.innerWidth, 1 / window.innerHeight);
 
         # this is the place where everything is mixed together
         @composer = new liveCodeLabCore_three.EffectComposer(
           @renderer, renderTarget)
+
+        feedbackSavePass = new liveCodeLabCore_three.SavePass(feedbackSaveTarget)
 
         # this is the effect that blends two buffers together
         # for motion blur.
@@ -155,15 +174,17 @@ define [
 
         screenPass = new liveCodeLabCore_three.ShaderPass(
           liveCodeLabCore_three.ShaderExtras.screen)
-        
+
         renderModel = new liveCodeLabCore_three.RenderPass(
           @scene, @camera)
 
 
         # first thing, render the model
         @composer.addPass renderModel
-        # then apply some fake post-processed antialiasing      
+        # then apply some fake post-processed antialiasing
         #@composer.addPass(fxaaPass);
+        # save result for use in video feedback materials, before the other save for motion blur
+        @composer.addPass feedbackSavePass
         # then blend using the previously saved buffer and a mixRatio
         @composer.addPass @effectBlend
         # the result is saved in a copy: effectSaveTarget.renderTarget
@@ -173,4 +194,3 @@ define [
         screenPass.renderToScreen = true
 
   ThreeJsSystem
-

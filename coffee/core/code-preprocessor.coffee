@@ -45,6 +45,8 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
       "stroke"
       "noFill"
       "noStroke"
+      "feedback"
+      "noFeedback"
     ]
     primitives: [
       # Geometry
@@ -83,7 +85,7 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
     ]
     colorCommands: [
       "fill"
-      "stroke"      
+      "stroke"
     ]
 
     expressions: [
@@ -226,24 +228,24 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
       #
       elaboratedSourceByLine = undefined
       if code.indexOf("doOnce") > -1
-        
+
         #alert("a doOnce is potentially executable")
         elaboratedSourceByLine = code.split("\n")
-        
+
         #alert('splitting: ' + elaboratedSourceByLine.length )
         for eachLine in [0...elaboratedSourceByLine.length]
-          
+
           #alert('iterating: ' + eachLine )
-          
+
           # add the line number tracing instruction to inline case
           elaboratedSourceByLine[eachLine] =
             elaboratedSourceByLine[eachLine].replace(
               /(^|\s+)doOnce[ \t]+(.+)$/g,
               "$1;addDoOnce(" + eachLine + "); 1.times -> $2")
-          
+
           # add the line number tracing instruction to multiline case
           if /(^|\s+)doOnce[ \t]*$/g.test(elaboratedSourceByLine[eachLine])
-            
+
             #alert('doOnce multiline!')
             elaboratedSourceByLine[eachLine] =
               elaboratedSourceByLine[eachLine].replace(
@@ -252,7 +254,7 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
               elaboratedSourceByLine[eachLine + 1].replace(
                 /^(\s*)(.+)$/g, "$1addDoOnce(" + eachLine + "); $2")
         code = elaboratedSourceByLine.join "\n"
-      
+
       #alert('soon after replacing doOnces'+code)
       return [code, error]
 
@@ -281,21 +283,21 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
 
       codeWithoutComments = undefined
       codeWithoutStringsOrComments = undefined
-      
+
       # check whether the program potentially
       # contains strings or comments
       # if it doesn't then we can do some
       # simple syntactic checks that are likely
       # to be much faster than attempting a
       # coffescript to javascript translation
-      
+
       # let's do a quick check:
       # these groups of characters should be in even number:
       # ", ', (), {}, []
       # Note that this doesn't check nesting, so for example
       # [{]} does pass the test.
       if @doesProgramContainStringsOrComments(code)
-        
+
         # OK the program contains comments and/or strings
         # so this is what we are going to do:
         # first we remove all the comments for good
@@ -327,16 +329,16 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
               numberOfLinesInMultilineComment = undefined
               rebuiltNewLines = undefined
               cycleToRebuildNewLines = undefined
-              
+
               # strings are kept as they are
               return quoted  if quoted
               return aposed  if aposed
-              
+
               # preserve the line because
               # the doOnce mechanism needs to retrieve
               # the line where it was
               return "\n"  if singleComment
-              
+
               # eliminate multiline comments preserving the lines
               numberOfLinesInMultilineComment = comment.split("\n").length - 1
               rebuiltNewLines = ""
@@ -345,7 +347,7 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
               rebuiltNewLines
         )
         codeWithoutComments = code
-        
+
         # in the version we use for syntax checking we delete all the strings
         codeWithoutStringsOrComments =
           code.replace(/("(?:[^"\\\n]|\\.)*")|('(?:[^'\\\n]|\\.)*')/g, "")
@@ -387,7 +389,7 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
         else if characterBeingExamined is ";"
           return [undefined,"break line instead of using ';'"]
         codeWithoutStringsOrComments = codeWithoutStringsOrComments.slice(1)
-      
+
       # according to jsperf, the fastest way to check if number is even/odd
       if aposCount & 1 or quoteCount & 1 or roundBrackCount & 1 or
           curlyBrackCount & 1 or squareBrackCount & 1
@@ -413,7 +415,7 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
 
         reasonOfBasicError = reasonOfBasicErrorMissing + " " + reasonOfBasicErrorUnbalanced
         return [undefined,reasonOfBasicError]
-      
+
       # no comments or strings were found, just return the same string
       # that was passed
       return [code, error]
@@ -580,7 +582,7 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
     unbindFunctionsToArguments: (code, error) ->
       # if there is an error, just propagate it
       return [undefined, error] if error?
-      # put back in place "sin⨁a,b" into "sin a,b" 
+      # put back in place "sin⨁a,b" into "sin a,b"
       code = code.replace(/⨁/g, "")
       return @normaliseCode(code, error)
 
@@ -604,7 +606,7 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
 
 
       # "expression" functions such as in "sin a,b" need to become
-      # "sin⨁a,b" 
+      # "sin⨁a,b"
       # the for is needed for example for cases like round(pulse 15) times
       expsAndUserFunctionsWithArgs =  @expressionsRegex + userDefinedFunctionsWithArguments
       rx = RegExp("(^|[^\\w\\d\\r\\n])("+expsAndUserFunctionsWithArgs+")([ \\(]+)(?![⧻\\+\\-*/%,⨁])",'gm')
@@ -639,7 +641,7 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
       # argument. This is needed to make it so
       # the qualifiers will be able to be fleshed out
       # correctly
-      
+
 
       # simple mathematical expressions
       # e.g. rotate 2,a+1+3*(a*2.32+Math.PI) 2 times box
@@ -691,8 +693,8 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
       if detailedDebug then console.log "transformTimesSyntax-3.8\n" + code + " error: " + error
       code = code.replace(/^([\t ]*)[♦;][;♦ ]*/gm, "$1")
       if detailedDebug then console.log "transformTimesSyntax-3.9\n" + code + " error: " + error
-      
-      # It's unclear whether the cases catered by the two 
+
+      # It's unclear whether the cases catered by the two
       # transformatione below ever make sense.
       # without the following, "a = (2 times box)" becomes "(a = 2.times -> box())"
       code = code.replace(/(\()\s*([\w\d])([^;\r\n]*) times[:]?([^\w\d])/g, "$1 ($2$3).times -> $4")
@@ -741,7 +743,7 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
     #   3 times with i box i
     # first bring to intermediate form
     #   3.timesWithVariable -> (i) -> box i
-    # then just to 
+    # then just to
     #   3.times (i) -> box i
     # which is then handled correctly by
     # coffeescript
@@ -802,7 +804,7 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
       if detailedDebug then console.log "adjustFunctionalReferences-1\n" + code + " error: " + error
 
       return [code, error]
-    
+
     adjustImplicitCalls: (code, error, userDefinedFunctions, userDefinedFunctionsWithArguments) ->
       # if there is an error, just propagate it
       return [undefined, error] if error?
@@ -810,7 +812,7 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
       expressionsAndUserDefinedFunctionsRegex = @expressionsRegex + userDefinedFunctions
       allFunctionsRegex = @allCommandsRegex + "|" + expressionsAndUserDefinedFunctionsRegex
 
-      
+
       # adding () to single tokens on their own at the start of a line
       # ball
       if detailedDebug then console.log "adjustImplicitCalls-1\n" + code + " error: " + error
@@ -878,7 +880,7 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
       #if random() > 0.5 then box 0.2,3; ball; background red
       #if ball then ball if true then 0 else 1
       #ball if true then 0 else 1
-      
+
       # tokens at the end of the line (without final semicolon,
       # if there is a final semicolon it's handled by previous case)
       # doOnce frame = 0; box
@@ -896,7 +898,7 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
 
       expressionsAndUserDefinedFunctionsRegex = @expressionsRegex + userDefinedFunctions
       allFunctionsRegex = @allCommandsRegex + "|" + expressionsAndUserDefinedFunctionsRegex
-      
+
       rx = RegExp("("+@allCommandsRegex+")([ \\t]*)("+@allCommandsRegex+")([ ]*)($)?",'gm')
       code = code.replace(rx, "$1();$2$3$4$5")
       if detailedDebug then console.log "addCommandsSeparations 1: " + code
@@ -1006,7 +1008,7 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
 
       # the trasformations above add lots of redundant
       # semicolons and spaces like so:
-      #    ...tate (-> rotate (-> box())))))))))); ;  ;   
+      #    ...tate (-> rotate (-> box())))))))))); ;  ;
       # so fixing that
       code = code.replace(/\);([; ]*)/g, "); ")
 
@@ -1019,7 +1021,7 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
       replacement = '$1$2 ->'
       code = code.replace(rx,replacement)
       if detailedDebug then console.log "fleshOutQualifiers 9: " + code
-      
+
       # replace all the → that *do* need to be prepended
       # with a comma
       code = code.replace(/([^,])\s+([\(]?)→/g, "$1, $2->")
@@ -1120,7 +1122,7 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
 
       rx = RegExp("("+expressionsAndUserDefinedFunctionsRegex+")([ \\t]*)times",'g')
       code = code.replace(rx, "$1()$2times")
-      
+
       rx = RegExp("([^;>\\( \\t\\r\\n])([ ])("+@allCommandsRegex+")([^\\w\\d\\r\\n])",'gm')
       code = code.replace(rx, "$1;$2$3$4")
       if detailedDebug then console.log "evaluateAllExpressions-1\n" + code + " error: " + error
@@ -1290,7 +1292,7 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
       code = code.replace(rx, "$1♠fill♠ ♦$3♦ $4")
       if detailedDebug then console.log "rearrangeColorCommands-3\n" + code + " error: " + error
 
-      
+
       # 1)
       # color1,exp color2 stroke/fill nocolor -> color1,exp stroke/fill color2 nocolor
       rx = RegExp("([\\t ]*)♦([^♦]*)♦[\\t ]+([,][\\t ]*)(([\\d\\w\\.\\(\\),]+([\\t ]*[\\+\\-*\\/⨁%,][\\t ]*))+[\\d\\w\\.\\(\\)]+|[\\d\\w\\.\\(\\)]+)*[\\t ]+♦([^♦]*)♦[\\t ]+♠("+@colorsCommandsRegex+")♠[\\t ]+(?!♦)",'gm')
@@ -1330,7 +1332,7 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
     #   rotate 3, a 1 box 3, 4, a 1
     # so it's translated in
     #   a = (val) -> val * 2
-    #   rotate 3, (a 1), -> box 3, 4, a 1 
+    #   rotate 3, (a 1), -> box 3, 4, a 1
     # same for
     #   rotate 3, wave wave 2 box 3, 4
     # ...turned into
@@ -1377,7 +1379,7 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
         # arrow
         rx = RegExp("("+qualifyingFunctionsRegex+")(.*)(, *->)",'')
         match = rx.exec code
-        
+
         if not match
           code = code.replace(rx, "$1$2, →")
           continue
@@ -1389,7 +1391,7 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
         # so to determine how many parens need to be added
         rx2 = RegExp("(("+expsAndUserFunctionsWithArgs+") +)",'g')
         match3 = match2.match(rx2)
-        
+
         if not match3
           code = code.replace(rx, "$1$2, →")
           continue
@@ -1412,7 +1414,7 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
           rx = RegExp("("+qualifyingFunctionsRegex+")(.*)(("+expsAndUserFunctionsWithArgs+") +)(.*)(, *->)",'')
           if detailedDebug then console.log "avoidLastArgumentInvocationOverflowing-0 regex: " + rx
           if detailedDebug then console.log "avoidLastArgumentInvocationOverflowing-0 on: " + code
-          
+
           code = code.replace(rx, "$1$2$4($5, ->")
 
         # finally, we change the arrow so that
@@ -1468,7 +1470,7 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
 
       [code, error] = @checkBasicErrorsWithTimes(code, error)
       if detailedDebug then console.log "preprocess-7\n" + code + " error: " + error
-      
+
 
 
       # Note that coffeescript allows you to split arguments
@@ -1558,7 +1560,7 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
 
           expressionsAndUserDefinedFunctionsRegex = @expressionsRegex + userDefinedFunctions
           allFunctionsRegex = @allCommandsRegex + "|" + expressionsAndUserDefinedFunctionsRegex
-          
+
           if testMoots
             appendString = 's'
             prependString = 't'
@@ -1574,7 +1576,7 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
               mootInputAppend = @normaliseCode(mootInputAppend,null)[0]
               [transformedMootAppend, errorMootAppend,] = @preprocess(mootInputAppend)
               mootInputPrepend = @normaliseCode(mootInputPrepend,null)[0]
-              [transformedMootPrepend, errorMootPrepend,] = @preprocess(mootInputPrepend)            
+              [transformedMootPrepend, errorMootPrepend,] = @preprocess(mootInputPrepend)
 
             if !errorMootAppend?
               if userDefinedFunctions != ""
@@ -1585,18 +1587,18 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
                 failedMootAppends++
                 console.log "unexpected transformation"
                 console.log "moot input:\n" + mootInputAppend
-                console.log "transformed into:\n" + transformedMootAppend          
+                console.log "transformed into:\n" + transformedMootAppend
 
             if !errorMootPrepend? and testMoots
               if userDefinedFunctions != ""
                 rx = RegExp(prependString+"("+userDefinedFunctions+")\\(\\)",'gm');
-                transformedMootPrepend = transformedMootPrepend.replace(rx, prependString+"$1")            
+                transformedMootPrepend = transformedMootPrepend.replace(rx, prependString+"$1")
               transformedMootPrepend = @stripCommentsAndStrings(transformedMootPrepend,null)[0]
               if mootInputPrepend != transformedMootPrepend
                 failedMootPrepends++
                 console.log "unexpected transformation"
                 console.log "moot input:\n" + mootInputPrepend
-                console.log "transformed into:\n" + transformedMootPrepend          
+                console.log "transformed into:\n" + transformedMootPrepend
 
 
           if transformed == testCase.expected and
@@ -1641,7 +1643,7 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
       sourceByLine = code.split("\n")
       startOfPreviousLine = ""
       linesWithBlockStart = []
-      
+
       for eachLine in [0...sourceByLine.length]
         line = sourceByLine[eachLine]
         #console.log "checking " + line
@@ -1673,7 +1675,7 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
       lengthToBeat = (match[1]).length
 
       linesWithBlockStart = []
-      
+
       for eachLine in [startLine...sourceByLine.length]
         line = sourceByLine[eachLine]
         rx = RegExp("^(\\s*)",'gm')
@@ -1694,13 +1696,13 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
 
       sourceByLine = code.split("\n")
       transformedLines = []
-      
+
       countingLines = -1;
       for line in sourceByLine
         countingLines++
         if countingLines in linesWithBlockStart
           #console.log "checking " + line
-          
+
           # if the line already ends with an arrow
           # then there is nothing to do
           rx = RegExp("->\\s*$",'gm')
@@ -1744,6 +1746,3 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
 
       #console.log "code lenght at completeImplicitFunctionPasses: " + transformedCode.split("\n").length
       return [transformedCode, undefined]
-
-
-
