@@ -1,18 +1,22 @@
 define () ->
   class MutatorCommands
+    animSpeed: 1
     currentGenes: {}
     geneDeltas: {}
     geneDefs: {}
     # keep track of names that have already been called, so that eg if a gene is called multiple times in a loop
     # it can detect this and not go along delta
     geneNamesThisFrame: []
+    geneNamesLastFrame: []
 
     addToScope: (scope) ->
       scope.add('gene',      (name, min, max) => @gene(name, min, max))
       scope.add('g',         (name, min, max) => @gene(name, min, max))
+      scope.add('animSpeed', (a) => @setAnimSpeed(a))
       scope.add('mutateDir', (delta) => @mutateDir(delta))
 
     resetFrame: ->
+      @geneNamesLastFrame = @geneNamesThisFrame
       @geneNamesThisFrame = []
 
     gene: (name, min=0, max=1) ->
@@ -33,21 +37,26 @@ define () ->
         @geneDeltas[name] = random(-range, range) / 100
 
       old = @currentGenes[name]
-      d = @geneDeltas[name]
+      d = @geneDeltas[name] * @animSpeed
       if old + d > max or old + d < min
-        d = @geneDeltas[name] *= -1
+        d *= -1
+        @geneDeltas[name] *= -1
       @currentGenes[name] += d
 
 
       return @currentGenes[name]
 
+    setAnimSpeed: (v=1) ->
+      @animSpeed = v
+
     mutateDir: (delta=1) ->
-      mutateGDir(n, delta) for n, v in @geneDeltas
+      @mutateGDir(n, delta) for n in @geneNamesLastFrame
 
     mutateGDir: (name, delta=1) ->
       old = @geneDeltas[name]
       gd = @geneDefs[name]
       range = gd.max - gd.min
       @geneDeltas[name] += delta * random(-range, range) / 1000
+      return true
 
   MutatorCommands

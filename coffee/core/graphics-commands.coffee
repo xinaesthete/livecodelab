@@ -476,13 +476,13 @@ define () ->
             new @liveCodeLabCore_three.MeshLambertMaterial()
         # ---- NEED TO WORK OUT PROPER PLACE FOR FEEDBACK ---
         if feedbackToBeUsed
-          pooledObjectWithMaterials.lambertMaterial.color.setHex colorToBeUsed
+          pooledObjectWithMaterials.feedbackLambertMaterial.color.setHex colorToBeUsed
           pooledObjectWithMaterials.feedbackLambertMaterial.map = @liveCodeLabCoreInstance.threeJsSystem.feedbackMap
           pooledObjectWithMaterials.threejsObject3D.material =
             pooledObjectWithMaterials.feedbackLambertMaterial
         # ////////
         else
-          pooledObjectWithMaterials.feedbackLambertMaterial.color.setHex colorToBeUsed
+          pooledObjectWithMaterials.lambertMaterial.color.setHex colorToBeUsed
           pooledObjectWithMaterials.threejsObject3D.material = pooledObjectWithMaterials.lambertMaterial
 
       # not all of these properties apply in all cases (for example sidedness
