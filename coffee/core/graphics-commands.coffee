@@ -446,7 +446,6 @@ define () ->
         if not pooledObjectWithMaterials.feedbackLambertMaterial?
           pooledObjectWithMaterials.feedbackLambertMaterial =
             new @liveCodeLabCore_three.MeshLambertMaterial()
-        # ---- NEED TO WORK OUT PROPER PLACE FOR FEEDBACK ---
         mat = pooledObjectWithMaterials.feedbackLambertMaterial
         mat.color.setHex colorToBeUsed
         mat.map = @liveCodeLabCoreInstance.threeJsSystem.feedbackMap
@@ -455,7 +454,6 @@ define () ->
         mat.transparent = true
         mat.side = @liveCodeLabCore_three.DoubleSide
         pooledObjectWithMaterials.threejsObject3D.material = mat
-        # ////////
       else if !feedbackToBeUsed and (colorToBeUsed is @angleColor or applyDefaultNormalColor)
         if not pooledObjectWithMaterials.normalMaterial?
           pooledObjectWithMaterials.normalMaterial =
@@ -463,7 +461,6 @@ define () ->
         pooledObjectWithMaterials.threejsObject3D.material =
           pooledObjectWithMaterials.normalMaterial
       else unless @liveCodeLabCoreInstance.lightSystem.lightsAreOn
-        # ---- NEED TO WORK OUT PROPER PLACE FOR FEEDBACK --- lights are on is more global than feedback... ~imitate 'stroke' logic
         if feedbackToBeUsed
           if not pooledObjectWithMaterials.feedbackBasicMaterial?
             pooledObjectWithMaterials.feedbackBasicMaterial =
@@ -476,7 +473,6 @@ define () ->
           mat.transparent = true
           mat.side = @liveCodeLabCore_three.DoubleSide
           pooledObjectWithMaterials.threejsObject3D.material = mat
-        # ////////
         else
           if not pooledObjectWithMaterials.basicMaterial?
             pooledObjectWithMaterials.basicMaterial =

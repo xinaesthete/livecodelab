@@ -32,7 +32,8 @@ define [
         submenu: "Evolutionary"
         title: "Hello Box"
         code: """
-                  // g() function declares a gene. First argument is required to give it a name
+                  // g() function declares a gene. First argument is required to give it a name.
+                  // I recommend using brackets to enclose arguments for this...
                   box g('boxSize')
 
                   // two more arguments can be passed to g() to define min & max values
@@ -74,12 +75,36 @@ define [
                   boxes()
               """
 
+      @programs.demos.feedback =
+        submenu: "Evolutionary"
+        title: "Feedback"
+        code: """
+                  ambientLight
+                  animSpeed 0.01
+
+                  ✓doOnce
+                  ▶mutateDir 100
+
+                  move 0, -1
+                  ▶box 0.3, 1, 0.1
+
+                  feedback
+                  rotate 0, 0, g('r1', -Math.PI, Math.PI)
+                  ▶box 1.6
+
+                  move 0.3, 0
+                  rotate 0, 0, g('r2', -Math.PI, Math.PI)
+                  ▶box 2.8, 2.6, 0.3
+
+              """
+
 
 
       @programs.demos.tendrils =
         submenu: "Evolutionary"
         title: "Tendrils"
         code: """
+                  //a thought: how about spiky tendrils?
                   ambientLight
                   animSpeed 0.4
 
