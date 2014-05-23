@@ -452,9 +452,11 @@ define () ->
         mat.map = @liveCodeLabCoreInstance.threeJsSystem.feedbackMap
         mat.blending = @liveCodeLabCore_three.AdditiveBlending
         mat.depthWrite = false
+        mat.transparent = true
+        mat.side = @liveCodeLabCore_three.DoubleSide
         pooledObjectWithMaterials.threejsObject3D.material = mat
         # ////////
-      else if colorToBeUsed is @angleColor or applyDefaultNormalColor
+      else if !feedbackToBeUsed and (colorToBeUsed is @angleColor or applyDefaultNormalColor)
         if not pooledObjectWithMaterials.normalMaterial?
           pooledObjectWithMaterials.normalMaterial =
             new @liveCodeLabCore_three.MeshNormalMaterial()
@@ -471,6 +473,8 @@ define () ->
           mat.color.setHex colorToBeUsed
           mat.blending = @liveCodeLabCore_three.AdditiveBlending
           mat.depthWrite = false
+          mat.transparent = true
+          mat.side = @liveCodeLabCore_three.DoubleSide
           pooledObjectWithMaterials.threejsObject3D.material = mat
         # ////////
         else
