@@ -447,10 +447,12 @@ define () ->
           pooledObjectWithMaterials.feedbackLambertMaterial =
             new @liveCodeLabCore_three.MeshLambertMaterial()
         # ---- NEED TO WORK OUT PROPER PLACE FOR FEEDBACK ---
-        pooledObjectWithMaterials.feedbackLambertMaterial.color.setHex colorToBeUsed
-        pooledObjectWithMaterials.feedbackLambertMaterial.map = @liveCodeLabCoreInstance.threeJsSystem.feedbackMap
-        pooledObjectWithMaterials.threejsObject3D.material =
-          pooledObjectWithMaterials.feedbackLambertMaterial
+        mat = pooledObjectWithMaterials.feedbackLambertMaterial
+        mat.color.setHex colorToBeUsed
+        mat.map = @liveCodeLabCoreInstance.threeJsSystem.feedbackMap
+        mat.blending = @liveCodeLabCore_three.AdditiveBlending
+        mat.depthWrite = false
+        pooledObjectWithMaterials.threejsObject3D.material = mat
         # ////////
       else if colorToBeUsed is @angleColor or applyDefaultNormalColor
         if not pooledObjectWithMaterials.normalMaterial?
@@ -464,10 +466,12 @@ define () ->
           if not pooledObjectWithMaterials.feedbackBasicMaterial?
             pooledObjectWithMaterials.feedbackBasicMaterial =
               new @liveCodeLabCore_three.MeshBasicMaterial()
-          pooledObjectWithMaterials.feedbackBasicMaterial.map = @liveCodeLabCoreInstance.threeJsSystem.feedbackMap
-          pooledObjectWithMaterials.feedbackBasicMaterial.color.setHex colorToBeUsed
-          pooledObjectWithMaterials.threejsObject3D.material =
-            pooledObjectWithMaterials.feedbackBasicMaterial
+          mat = pooledObjectWithMaterials.feedbackBasicMaterial
+          mat.map = @liveCodeLabCoreInstance.threeJsSystem.feedbackMap
+          mat.color.setHex colorToBeUsed
+          mat.blending = @liveCodeLabCore_three.AdditiveBlending
+          mat.depthWrite = false
+          pooledObjectWithMaterials.threejsObject3D.material = mat
         # ////////
         else
           if not pooledObjectWithMaterials.basicMaterial?
@@ -651,7 +655,7 @@ define () ->
         @createObjectIfNeededAndDressWithCorrectMaterial(
           a, b, c, primitiveProperties,
           false, @currentFillColor, @currentFillAlpha,
-          @defaultNormalFill
+          @defaultNormalFill, @doFeedback
         )
       else if (not @doFill or not primitiveProperties.canFill) and @doStroke
 
