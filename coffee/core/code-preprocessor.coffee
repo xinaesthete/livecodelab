@@ -82,6 +82,8 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
       "pointLight"
       # Server connections
       "connect"
+      # mutator
+      "mutateDir"
     ]
     colorCommands: [
       "fill"
@@ -130,6 +132,7 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
       "color"
       # Mutator
       "gene"
+      "g"
     ]
 
 

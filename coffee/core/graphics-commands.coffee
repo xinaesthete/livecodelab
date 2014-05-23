@@ -433,24 +433,32 @@ define () ->
         pooledObjectWithMaterials.threejsObject3D.material =
           pooledObjectWithMaterials.lineMaterial
       else if objectIsNew or (
-        colorToBeUsed is @angleColor or applyDefaultNormalColor
+        feedbackToBeUsed and @liveCodeLabCoreInstance.lightSystem.lightsAreOn
       )
-
         # the first time we render a an object we need to
         # render it with the material that takes the
         # bigger buffer space, see:
         # https://github.com/mrdoob/three.js/issues/1051
         # Another workaround would be to create a pooled object
         # for each different type of material.
+        # PJT: now trying to use textures, it seems that
+        # a lit, textured material will need the biggest buffer, so...
+        if not pooledObjectWithMaterials.feedbackLambertMaterial?
+          pooledObjectWithMaterials.feedbackLambertMaterial =
+            new @liveCodeLabCore_three.MeshLambertMaterial()
+        # ---- NEED TO WORK OUT PROPER PLACE FOR FEEDBACK ---
+        pooledObjectWithMaterials.feedbackLambertMaterial.color.setHex colorToBeUsed
+        pooledObjectWithMaterials.feedbackLambertMaterial.map = @liveCodeLabCoreInstance.threeJsSystem.feedbackMap
+        pooledObjectWithMaterials.threejsObject3D.material =
+          pooledObjectWithMaterials.feedbackLambertMaterial
+        # ////////
+      else if colorToBeUsed is @angleColor or applyDefaultNormalColor
         if not pooledObjectWithMaterials.normalMaterial?
           pooledObjectWithMaterials.normalMaterial =
             new @liveCodeLabCore_three.MeshNormalMaterial()
         pooledObjectWithMaterials.threejsObject3D.material =
           pooledObjectWithMaterials.normalMaterial
       else unless @liveCodeLabCoreInstance.lightSystem.lightsAreOn
-        if not pooledObjectWithMaterials.basicMaterial?
-          pooledObjectWithMaterials.basicMaterial =
-            new @liveCodeLabCore_three.MeshBasicMaterial()
         # ---- NEED TO WORK OUT PROPER PLACE FOR FEEDBACK --- lights are on is more global than feedback... ~imitate 'stroke' logic
         if feedbackToBeUsed
           if not pooledObjectWithMaterials.feedbackBasicMaterial?
@@ -462,26 +470,17 @@ define () ->
             pooledObjectWithMaterials.feedbackBasicMaterial
         # ////////
         else
+          if not pooledObjectWithMaterials.basicMaterial?
+            pooledObjectWithMaterials.basicMaterial =
+              new @liveCodeLabCore_three.MeshBasicMaterial()
           pooledObjectWithMaterials.basicMaterial.color.setHex colorToBeUsed
           pooledObjectWithMaterials.threejsObject3D.material = pooledObjectWithMaterials.basicMaterial
 
-      else
-
+      else if !feedbackToBeUsed
         # lights are on
         if not pooledObjectWithMaterials.lambertMaterial?
           pooledObjectWithMaterials.lambertMaterial =
             new @liveCodeLabCore_three.MeshLambertMaterial()
-        if not pooledObjectWithMaterials.feedbackLambertMaterial?
-          pooledObjectWithMaterials.feedbackLambertMaterial =
-            new @liveCodeLabCore_three.MeshLambertMaterial()
-        # ---- NEED TO WORK OUT PROPER PLACE FOR FEEDBACK ---
-        if feedbackToBeUsed
-          pooledObjectWithMaterials.feedbackLambertMaterial.color.setHex colorToBeUsed
-          pooledObjectWithMaterials.feedbackLambertMaterial.map = @liveCodeLabCoreInstance.threeJsSystem.feedbackMap
-          pooledObjectWithMaterials.threejsObject3D.material =
-            pooledObjectWithMaterials.feedbackLambertMaterial
-        # ////////
-        else
           pooledObjectWithMaterials.lambertMaterial.color.setHex colorToBeUsed
           pooledObjectWithMaterials.threejsObject3D.material = pooledObjectWithMaterials.lambertMaterial
 

@@ -112,27 +112,29 @@ define [
         screenPass = undefined
         renderModel = undefined
         renderTargetParameters =
-          format: liveCodeLabCore_three.RGBFormat #liveCodeLabCore_three.RGBAFormat
+          format: liveCodeLabCore_three.RGBFormat
           stencilBuffer: true
+          generateMipmaps: false
+          minFilter: liveCodeLabCore_three.LinearFilter
 
         # these are the three buffers.
 
         renderTarget = new liveCodeLabCore_three.WebGLRenderTarget(
           @blendedThreeJsSceneCanvas.width,
           @blendedThreeJsSceneCanvas.height,
-          renderTargetParameters)
-        renderTarget.generateMipmaps = false
-
-        feedbackSaveTarget = new liveCodeLabCore_three.SavePass(
-          new liveCodeLabCore_three.WebGLRenderTarget(
+          renderTargetParameters
+        )
+        # renderTarget.generateMipmaps = false
+        renderTargetParameters.depthBuffer = false
+        feedbackSaveTarget = new liveCodeLabCore_three.WebGLRenderTarget(
             @blendedThreeJsSceneCanvas.width,
             @blendedThreeJsSceneCanvas.height,
             renderTargetParameters
-          )
         )
         feedbackSaveTarget.clear = false
-        feedbackSaveTarget.generateMipmaps = false
-        @feedbackMap = feedbackSaveTarget.renderTarget
+        #feedbackSaveTarget.renderTarget.generateMipmaps = false
+        feedbackSaveTarget.xxtag = "feedback target"
+        @feedbackMap = feedbackSaveTarget
 
         effectSaveTarget = new liveCodeLabCore_three.SavePass(
           new liveCodeLabCore_three.WebGLRenderTarget(
