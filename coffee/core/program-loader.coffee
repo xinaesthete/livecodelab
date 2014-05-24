@@ -79,15 +79,21 @@ define [
         submenu: "Evolutionary"
         title: "Feedback"
         code: """
+                  // video feedback uses the image rendered in the previous frame
+                  // as source material for generating the current frame
+                  // ... interesting forms of chaos can result ... //
+
                   ambientLight
-                  animSpeed 0.01
+                  animSpeed 0.1
 
                   ✓doOnce
-                  ▶mutateDir 100
+                  ▶mutateDir 0.5
 
                   move 0, -1
                   ▶box 0.3, 1, 0.1
 
+                  //note that the resulting image will be quite dependant on aspect ratio...
+                  //so tweak numbers to get something not blown out / too decayed...
                   feedback
                   rotate 0, 0, g('r1', -Math.PI, Math.PI)
                   ▶box 1.6
@@ -98,34 +104,61 @@ define [
 
               """
 
+      @programs.demos.feedback2 =
+        submenu: "Evolutionary"
+        title: "Feedback 2"
+        code: """
+                  ambientLight
+                  i = 0
+                  noStroke
+                  fill g('r'+i)*255, g('g'+i)*255, g('b'+i)*255
+                  move 0, -1
+                  ▶ball 0.3, 1, 0.1
+
+                  feedback
+                  move 0.2, 0
+                  rotate 0, 0, -0.6
+                  ▶box 1.6
+
+                  30 times->
+                  ▶scale 0.8
+                  ▶i++
+                  ▶fill g('r'+i)*255, g('g'+i)*255, g('b'+i)*255, g('a'+i, 150, 255)
+                  ▶move g('m', 0.2, 0.5)
+                  ▶rotate time/2, 0, g('r2', -Math.PI, Math.PI)
+                  ▶box 2.8, 2.6, 0.5
+
+              """
 
 
       @programs.demos.tendrils =
         submenu: "Evolutionary"
         title: "Tendrils"
         code: """
-                  //a thought: how about spiky tendrils?
+                  //a thought/exercise: how about spiky tendrils?
+                  //or making this the head of a creature...
                   ambientLight
                   animSpeed 0.4
 
-                  rib = (rx, ry) ->
+                  arm = (rx, ry) ->
                   ▶scale 1
                   ▶▶15 times ->
-                  ▶▶▶//notice that the g('m') will have the same value for all parts of all ribs
+                  ▶▶▶//notice that the g('m') will have the same value for all parts of all arms
                   ▶▶▶move g('m')
                   ▶▶▶rotate rx, ry
                   ▶▶▶scale 0.8
                   ▶▶▶ball
 
                   scale 0.2
-                  nRibs = (n, id) ->
+                  nArms = (n, id) ->
                   ▶i = 0
                   ▶n times ->
                   ▶▶i++
-                  ▶▶//each rib is given unique genes for rx & ry
-                  ▶▶rib g('rx'+i+id), g('ry'+i+id)
+                  ▶▶rotate 0, 0, 2*Math.PI/n
+                  ▶▶//each arm is given unique genes for rx & ry
+                  ▶▶arm g('rx'+i+id), g('ry'+i+id)
 
-                  nRibs(20, 'a')
+                  nArms(20, 'a')
               """
 
       @programs.demos.roseDemo =

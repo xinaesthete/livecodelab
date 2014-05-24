@@ -118,7 +118,7 @@ define [
           minFilter: liveCodeLabCore_three.LinearFilter
 
         # these are the three buffers.
-
+        # TODO: support for oversampling (nb, to show real pixels on rMBP, canvas itself might need changing)
         renderTarget = new liveCodeLabCore_three.WebGLRenderTarget(
           @blendedThreeJsSceneCanvas.width,
           @blendedThreeJsSceneCanvas.height,

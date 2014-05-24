@@ -14,6 +14,7 @@ define () ->
       scope.add('g',         (name, min, max) => @gene(name, min, max))
       scope.add('animSpeed', (a) => @setAnimSpeed(a))
       scope.add('mutateDir', (delta) => @mutateDir(delta))
+      scope.add('mutate',    (delta) => @mutate(delta))
 
     resetFrame: ->
       @geneNamesLastFrame = @geneNamesThisFrame
@@ -47,16 +48,32 @@ define () ->
       return @currentGenes[name]
 
     setAnimSpeed: (v=1) ->
+      v = 1 if typeof v isnt 'number'
       @animSpeed = v
 
-    mutateDir: (delta=1) ->
+    mutate: (delta=0.1) ->
+      delta = 0.1 if typeof delta isnt 'number'
+      @mutateG(n, delta) for n in @geneNamesLastFrame
+
+    mutateG: (name, delta=0.1) ->
+      delta = Math.min(Math.max(delta, 0), 1)
+      gd = @geneDefs[name]
+      old = @currentGenes[name]
+      v = random(gd.min, gd.max)
+      @currentGenes[name] = lerp(@currentGenes[name], v, delta)
+      return true
+
+    mutateDir: (delta=0.1) ->
+      delta = 0.1 if typeof delta isnt 'number'
       @mutateGDir(n, delta) for n in @geneNamesLastFrame
 
-    mutateGDir: (name, delta=1) ->
+    mutateGDir: (name, delta=0.1) ->
+      delta = Math.min(Math.max(delta, 0), 1)
       old = @geneDeltas[name]
       gd = @geneDefs[name]
       range = gd.max - gd.min
-      @geneDeltas[name] += delta * random(-range, range) / 1000
+      v = random(-range, range) / 100
+      @geneDeltas[name] = lerp(@geneDeltas[name], v, delta)
       return true
 
   MutatorCommands
