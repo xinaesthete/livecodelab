@@ -125,7 +125,7 @@ require [
     #console.log('creating stats')
     ui = new Ui(eventRouter, stats, programLoader) # $
     # requires: ColourNames
-    autocoder = new Autocoder(eventRouter, editor, liveCodeLabCore.colourLiterals.colourNames) # McLexer
+    autocoder = new Autocoder(eventRouter, editor, liveCodeLabCore.colourLiterals.colourNames)
     # Setup Event Listeners
     eventRouter.addListener("reset", => autocoder.toggle(false))
     eventRouter.addListener("toggle-autocoder", => autocoder.toggle())
@@ -285,8 +285,9 @@ require [
     # otherwise we do as usual.
     if !urlRouter.urlPointsToDemoOrTutorial()
       setTimeout (()=>liveCodeLabCore.playStartupSound()), 650
-    bigCursor.toggleBlink true
+      bigCursor.toggleBlink true
     ui.setup()
+    setTimeout (()=>programLoader.kickOff()), 650
 
   if setupForNormalLCLPage?
     $(document).ready ->
@@ -296,9 +297,10 @@ require [
       canvasName = "blendedThreeJsSceneCanvas"
       document.getElementById(canvasName).width = window.innerWidth
       document.getElementById(canvasName).height = window.innerHeight
+      #console.log "setting canvas size to :" +  document.getElementById(canvasName).width + " x " + document.getElementById(canvasName).height
       startEnvironment
         blendedThreeJsSceneCanvas: document.getElementById(canvasName)
-        canvasForBackground: document.getElementById("backgroundDiv")
+        canvasForBackground: document.getElementById("backgroundCanvasOrDiv")
         forceCanvasRenderer: false
         bubbleUpErrorsForDebugging: false
         

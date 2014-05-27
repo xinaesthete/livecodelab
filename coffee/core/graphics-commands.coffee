@@ -243,8 +243,9 @@ define () ->
         new @liveCodeLabCore_three.Vector3(0, -0.5 * lineProportion, 0)
       @geometriesBank[@primitiveTypes.line].vertices.push \
         new @liveCodeLabCore_three.Vector3(0, 0.5 * lineProportion, 0)
+        @geometriesBank[@primitiveTypes.line].mergeVertices()
       @geometriesBank[@primitiveTypes.rect] = new @liveCodeLabCore_three.PlaneGeometry(1 * rectProportion, 1 * rectProportion)
-      @geometriesBank[@primitiveTypes.box] = new @liveCodeLabCore_three.CubeGeometry(1 * boxProportion, 1 * boxProportion, 1 * boxProportion)
+      @geometriesBank[@primitiveTypes.box] = new @liveCodeLabCore_three.BoxGeometry(1 * boxProportion, 1 * boxProportion, 1 * boxProportion)
       @geometriesBank[@primitiveTypes.peg] =
         new @liveCodeLabCore_three.CylinderGeometry(0.5 * pegProportion, 0.5 * pegProportion, 1 * pegProportion, 32)
       # @geometriesBank[@primitiveType.torus] = new @liveCodeLabCore_three.
@@ -430,8 +431,7 @@ define () ->
         # associating normal material to threejs' Object3D
         if @currentStrokeColor is @angleColor or @defaultNormalStroke
           theAngle =
-            pooledObjectWithMaterials.threejsObject3D.matrix.multiplyVector3(
-              new @liveCodeLabCore_three.Vector3(0, 1, 0)).normalize()
+            (new @liveCodeLabCore_three.Vector3(0, 1, 0)).applyProjection(pooledObjectWithMaterials.threejsObject3D.matrix).normalize()
           pooledObjectWithMaterials.lineMaterial.color.setHex(
             @liveCodeLabCoreInstance.colourFunctions.color(
               ((theAngle.x + 1) / 2) * 255,
@@ -560,8 +560,7 @@ define () ->
         # by setting the scale to almost zero. The object will still go through
         # the rendering step, so the memory for the material is initialised
         # correctly.
-        pooledObjectWithMaterials.threejsObject3D.matrix.scale \
-          new @liveCodeLabCore_three.Vector3(0.0001, 0.0001, 0.0001)
+        pooledObjectWithMaterials.threejsObject3D.matrix.multiply(new @liveCodeLabCore_three.Matrix4().makeScale(0.0001, 0.0001, 0.0001))
       else if a isnt 1 or b isnt 1 or c isnt 1
         if strokeTime
           # wireframes are built via separate objects with geometries that are
@@ -571,15 +570,13 @@ define () ->
           # note that we avoid this on unitary box as it's a common
           # case that is simple to check where there is no need
           # of these 16 extra multiplications (of the scale)
-          pooledObjectWithMaterials.threejsObject3D.matrix.scale \
-            new @liveCodeLabCore_three.Vector3(a + 0.001, b + 0.001, c + 0.001)
+          pooledObjectWithMaterials.threejsObject3D.matrix.multiply(new @liveCodeLabCore_three.Matrix4().makeScale(a + 0.001, b + 0.001, c + 0.001))
         else
           # odd things happen setting scale to zero
           a = 0.000000001  if a > -0.000000001 and a < 0.000000001
           b = 0.000000001  if b > -0.000000001 and b < 0.000000001
           c = 0.000000001  if c > -0.000000001 and c < 0.000000001
-          pooledObjectWithMaterials.threejsObject3D.matrix.scale \
-            new @liveCodeLabCore_three.Vector3(a, b, c)
+          pooledObjectWithMaterials.threejsObject3D.matrix.multiply(new @liveCodeLabCore_three.Matrix4().makeScale(a, b, c))
 
 
       # exclusionPrincipleWobble doesn't apply in the
@@ -605,8 +602,10 @@ define () ->
           @numberOfOverlappingPrimitives[primitiveID]++
           overlapPrimtives = @numberOfOverlappingPrimitives[primitiveID]
           pert = sin(time*10) * sin(overlapPrimtives + time*10)/40
-          pooledObjectWithMaterials.threejsObject3D.matrix.rotateX(pert).rotateY(pert).rotateZ pert
-          pooledObjectWithMaterials.threejsObject3D.matrix.translate new @liveCodeLabCore_three.Vector3(pert, pert, pert)
+          #pooledObjectWithMaterials.threejsObject3D.matrix.makeRotationX(pert).makeRotationY(pert).makeRotationZ(pert)
+          pooledObjectWithMaterials.threejsObject3D.matrix.multiply(new @liveCodeLabCore_three.Matrix4().makeRotationFromEuler(new @liveCodeLabCore_three.Euler(pert,pert,pert,'XYZ')))
+
+          pooledObjectWithMaterials.threejsObject3D.matrix.multiply(new @liveCodeLabCore_three.Matrix4().makeTranslation(pert, pert, pert))
         else
           #console.log "nothing here already - setting  " + primitiveID + " with " + pooledObjectWithMaterials.threejsObject3D.matrix
           @lastPositionOfPrimitiveType[primitiveID].copy \

@@ -19,15 +19,7 @@ define [
       @programs =
         demos: {}
         tutorials: {}
-      setInterval(
-        ()=>
-          @pollHash()
-        , 100)
-      # Setup Event Listeners
-      eventRouter.addListener("url-hash-changed", (hash) =>
-        @loadAppropriateDemoOrTutorialBasedOnHash hash
-      )
-
+      
       @programs.demos.aBoxTest =
         submenu: "Evolutionary"
         title: "Hello Box"
@@ -170,7 +162,7 @@ define [
                   // 'B rose' by Guy John (@rumblesan)
                   // Mozilla Festival 2012
                   // adapted from 'A rose' by Lib4tech
-
+                  
                   background red
                   scale 1.5
                   animationStyle paintOver
@@ -180,7 +172,7 @@ define [
                   scale 1-((frame/2)%255) / 255
                   box
                   """
-
+      
       @programs.demos.cheeseAndOlivesDemo =
         submenu: "Basic"
         title: "Cheese and olives"
@@ -188,7 +180,7 @@ define [
               // 'Cheese and olives' by
               // Davina Tirvengadum
               // Mozilla festival 2012
-
+              
               background white
               scale .3
               move 0,-1
@@ -198,21 +190,21 @@ define [
               strokeSize 3
               line 4
               box
-
+              
               rotate 2,3
               move 0,3
               scale .3
               fill black
               stroke black
               ball
-
+              
               rotate 3
               move 5
               scale 1
               fill green
               stroke green
               ball
-
+              
               rotate 1
               move -3
               scale 1
@@ -220,19 +212,19 @@ define [
               stroke yellow
               ball
               """
-
+    
       @programs.demos.simpleCubeDemo =
         submenu: "Basic"
         title: "Simple cube"
         code: """
               // there you go!
               // a simple cube!
-
+              
               background yellow
               rotate 0,time/2,time/2
               box
               """
-
+    
       @programs.demos.webgltwocubesDemo =
         submenu: "WebGL"
         title: "WebGL: Two cubes"
@@ -242,7 +234,7 @@ define [
               ▶rotate 0, 1, time/2
               ▶box
               """
-
+    
       @programs.demos.cubesAndSpikes =
         submenu: "Basic"
         title: "Cubes and spikes"
@@ -257,7 +249,7 @@ define [
               ▶▶rotate 0,1,1
               ▶▶box 0.01,0.01,1
               """
-
+    
       @programs.demos.webglturbineDemo =
         submenu: "WebGL"
         title: "WebGL: Turbine"
@@ -267,7 +259,7 @@ define [
               ▶rotate time/100,1,time/100
               ▶box
               """
-
+    
       @programs.demos.webglzfightartDemo =
         submenu: "WebGL"
         title: "WebGL: Z-fight!"
@@ -283,7 +275,7 @@ define [
               fill yellow
               box
               """
-
+    
       @programs.demos.littleSpiralOfCubes =
         submenu: "Basic"
         title: "Little spiral"
@@ -295,7 +287,7 @@ define [
               ▶move 1,1,1
               ▶box
               """
-
+    
       @programs.demos.tentacleDemo =
         submenu: "Basic"
         title: "Tentacle"
@@ -310,7 +302,7 @@ define [
               ▶▶move 1,1,1
               ▶▶box
               """
-
+    
       @programs.demos.lampDemo =
         submenu: "Basic"
         title: "Lamp"
@@ -328,7 +320,7 @@ define [
               ▶move -0.5,0,0
               ▶line
               """
-
+    
       @programs.demos.trillionfeathersDemo =
         submenu: "Basic"
         title: "A trillion feathers"
@@ -344,7 +336,7 @@ define [
               ▶move -0.5,0,0
               ▶line
               """
-
+    
       @programs.demos.monsterblobDemo =
         submenu: "Basic"
         title: "Monster blob"
@@ -360,7 +352,7 @@ define [
               ▶▶rotate 1
               ▶▶ball -1
               """
-
+    
       @programs.demos.industrialMusicDemo =
         submenu: "Sound"
         title: "Sound: Industrial"
@@ -374,7 +366,7 @@ define [
               play 'voltage'  ,'xzxz zxzz xzxx xzxx'
               play 'tranceKick'  ,'zxzx zzzx xzzz zzxx'
               """
-
+    
       @programs.demos.trySoundsDemo =
         submenu: "Sound"
         title: "Sound: Try them all"
@@ -382,41 +374,83 @@ define [
               bpm 88
               // leave this one as base
               play 'tranceKick'  ,'zxzx zzzx xzzz zzxx'
-
+              
               // uncomment the sounds you want to try
-              //play 'toc'  ,'zzxz zzzz zzxz zzzz'
+              //play 'alienBeep'  ,'zzxz zzzz zzxz zzzz'
+              //play 'beep'  ,'zzxz zzzz zzxz zzzz'
+              //play 'beep0'  ,'zzxz zzzz zzxz zzzz'
+              //play 'beep1'  ,'zzxz zzzz zzxz zzzz'
+              //play 'beep2'  ,'zzxz zzzz zzxz zzzz'
+              //play 'beep3'  ,'zzxz zzzz zzxz zzzz'
+              //play 'bing'  ,'zzxz zzzz zzxz zzzz'
+              //play 'ciack'  ,'zzxz zzzz zzxz zzzz'
+              //play 'ciack0'  ,'zzxz zzzz zzxz zzzz'
+              //play 'ciack1'  ,'zzxz zzzz zzxz zzzz'
+              //play 'cosmos'  ,'zzxz zzzz zzxz zzzz'
+              //play 'crash'  ,'zzxz zzzz zzxz zzzz'
+              //play 'crash0'  ,'zzxz zzzz zzxz zzzz'
+              //play 'crash1'  ,'zzxz zzzz zzxz zzzz'
+              //play 'crash2'  ,'zzxz zzzz zzxz zzzz'
+              //play 'detune'  ,'zzxz zzzz zzxz zzzz'
+              //play 'dish'  ,'zzxz zzzz zzxz zzzz'
+              //play 'dish0'  ,'zzxz zzzz zzxz zzzz'
+              //play 'dish1'  ,'zzxz zzzz zzxz zzzz'
+              //play 'dish2'  ,'zzxz zzzz zzxz zzzz'
+              //play 'downstairs'  ,'zzxz zzzz zzxz zzzz'
+              //play 'glass'  ,'zzxz zzzz zzxz zzzz'
               //play 'highHatClosed'  ,'zzxz zzzz zzxz zzzz'
               //play 'highHatOpen'  ,'zzxz zzzz zzxz zzzz'
-              //play 'toc2'  ,'zzxz zzzz zzxz zzzz'
-              //play 'toc3'  ,'zzxz zzzz zzxz zzzz'
-              //play 'toc4'  ,'zzxz zzzz zzxz zzzz'
-              //play 'snare'  ,'zzxz zzzz zzxz zzzz'
-              //play 'snare2'  ,'zzxz zzzz zzxz zzzz'
-              //play 'china'  ,'zzxz zzzz zzxz zzzz'
-              //play 'crash'  ,'zzxz zzzz zzxz zzzz'
-              //play 'crash2'  ,'zzxz zzzz zzxz zzzz'
-              //play 'crash3'  ,'zzxz zzzz zzxz zzzz'
-              //play 'ride'  ,'zzxz zzzz zzxz zzzz'
-              //play 'glass'  ,'zzxz zzzz zzxz zzzz'
-              //play 'glass1'  ,'zzxz zzzz zzxz zzzz'
-              //play 'glass2'  ,'zzxz zzzz zzxz zzzz'
-              //play 'glass3'  ,'zzxz zzzz zzxz zzzz'
-              //play 'thump'  ,'zzxz zzzz zzxz zzzz'
+              //play 'hiss'  ,'zzxz zzzz zzxz zzzz'
+              //play 'hiss0'  ,'zzxz zzzz zzxz zzzz'
+              //play 'hiss1'  ,'zzxz zzzz zzxz zzzz'
+              //play 'hiss2'  ,'zzxz zzzz zzxz zzzz'
               //play 'lowFlash'  ,'zzxz zzzz zzxz zzzz'
-              //play 'lowFlash2'  ,'zzxz zzzz zzxz zzzz'
-              //play 'tranceKick2'  ,'zzxz zzzz zzxz zzzz'
+              //play 'lowFlash0'  ,'zzxz zzzz zzxz zzzz'
+              //play 'lowFlash1'  ,'zzxz zzzz zzxz zzzz'
+              //play 'mouth'  ,'zzxz zzzz zzxz zzzz'
+              //play 'mouth0'  ,'zzxz zzzz zzxz zzzz'
+              //play 'mouth1'  ,'zzxz zzzz zzxz zzzz'
+              //play 'mouth2'  ,'zzxz zzzz zzxz zzzz'
+              //play 'mouth3'  ,'zzxz zzzz zzxz zzzz'
+              //play 'mouth4'  ,'zzxz zzzz zzxz zzzz'
+              //play 'penta0'  ,'zzxz zzzz zzxz zzzz'
+              //play 'penta1'  ,'zzxz zzzz zzxz zzzz'
+              //play 'penta2'  ,'zzxz zzzz zzxz zzzz'
+              //play 'penta3'  ,'zzxz zzzz zzxz zzzz'
+              //play 'penta4'  ,'zzxz zzzz zzxz zzzz'
+              //play 'penta5'  ,'zzxz zzzz zzxz zzzz'
+              //play 'penta6'  ,'zzxz zzzz zzxz zzzz'
+              //play 'penta7'  ,'zzxz zzzz zzxz zzzz'
+              //play 'penta8'  ,'zzxz zzzz zzxz zzzz'
+              //play 'penta9'  ,'zzxz zzzz zzxz zzzz'
+              //play 'penta10'  ,'zzxz zzzz zzxz zzzz'
+              //play 'penta11'  ,'zzxz zzzz zzxz zzzz'
+              //play 'penta12'  ,'zzxz zzzz zzxz zzzz'
+              //play 'penta13'  ,'zzxz zzzz zzxz zzzz'
+              //play 'penta14'  ,'zzxz zzzz zzxz zzzz'
+              //play 'penta15'  ,'zzxz zzzz zzxz zzzz'
+              //play 'ride'  ,'zzxz zzzz zzxz zzzz'
+              //play 'snap'  ,'zzxz zzzz zzxz zzzz'
+              //play 'snap0'  ,'zzxz zzzz zzxz zzzz'
+              //play 'snap1'  ,'zzxz zzzz zzxz zzzz'
+              //play 'snare'  ,'zzxz zzzz zzxz zzzz'
+              //play 'snare0'  ,'zzxz zzzz zzxz zzzz'
+              //play 'snare1'  ,'zzxz zzzz zzxz zzzz'
+              //play 'snare2'  ,'zzxz zzzz zzxz zzzz'
+              //play 'thump'  ,'zzxz zzzz zzxz zzzz'
+              //play 'thump0'  ,'zzxz zzzz zzxz zzzz'
+              //play 'thump1'  ,'zzxz zzzz zzxz zzzz'
+              //play 'thump2'  ,'zzxz zzzz zzxz zzzz'
+              //play 'toc'  ,'zzxz zzzz zzxz zzzz'
+              //play 'toc0'  ,'zzxz zzzz zzxz zzzz'
+              //play 'toc1'  ,'zzxz zzzz zzxz zzzz'
               //play 'tranceKick'  ,'zzxz zzzz zzxz zzzz'
-              //play 'wosh'  ,'zzxz zzzz zzxz zzzz'
+              //play 'tranceKick0'  ,'zzxz zzzz zzxz zzzz'
+              //play 'tranceKick1'  ,'zzxz zzzz zzxz zzzz'
               //play 'voltage'  ,'zzxz zzzz zzxz zzzz'
-              //play 'beepA'  ,'zzxz zzzz zzxz zzzz'
-              //play 'beepB'  ,'zzxz zzzz zzxz zzzz'
-              //play 'beepC'  ,'zzxz zzzz zzxz zzzz'
-              //play 'beepD'  ,'zzxz zzzz zzxz zzzz'
-              //play 'beep'  ,'zzxz zzzz zzxz zzzz'
-              //play 'hello'  ,'zzxz zzzz zzxz zzzz'
-              //play 'alienBeep'  ,'zzxz zzzz zzxz zzzz'
+              //play 'warm'  ,'zzxz zzzz zzxz zzzz'
               """
-
+    
       @programs.demos.springysquaresDemo =
         submenu: "Basic"
         title: "Springy squares"
@@ -431,7 +465,7 @@ define [
               ▶▶move 0.7,0,0
               ▶▶rect
               """
-
+    
       @programs.demos.diceDemo =
         submenu: "Basic"
         title: "Dice"
@@ -449,7 +483,7 @@ define [
               ▶▶move 2,0,0
               ▶▶box
               """
-
+    
       @programs.demos.webglalmostvoronoiDemo =
         submenu: "WebGL"
         title: "WebGL: Almost Voronoi"
@@ -473,7 +507,7 @@ define [
               ▶rotate 0,1,1
               ▶ball -1.01
               """
-
+    
       @programs.demos.webglredthreadsDemo =
         submenu: "WebGL"
         title: "WebGL: Red threads"
@@ -489,7 +523,7 @@ define [
               ▶rotate 0,1,1
               ▶ball
               """
-
+    
       @programs.demos.webglribbon =
         submenu: "WebGL"
         title: "WebGL: Ribbon"
@@ -527,7 +561,7 @@ define [
               ▶▶rotate turns*i*Math.PI/(detail)+time*speed,0,0
               ▶▶rect 1
               """
-
+    
       @programs.demos.webglnuclearOctopusDemo =
         submenu: "WebGL"
         title: "WebGL: Nuclear octopus"
@@ -552,23 +586,23 @@ define [
               ▶▶box
               ▶popMatrix
               """
-
+    
       @programs.tutorials.introTutorial =
         submenu: "Intro"
         title: "intro"
         code: """
               // Lines beginning with two
               // slashes (like these) are just comments.
-
+              
               // Everything else is run
               // about 30 to 60 times per second
               // in order to create an animation.
-
+              
               // Click the link below to start the tutorial.
-
+              
               // next-tutorial:hello_world
               """
-
+    
       @programs.tutorials.helloworldTutorial =
         submenu: "Intro"
         title: "hello world"
@@ -576,14 +610,14 @@ define [
               // type these three letters
               // in one of these empty lines below:
               // 'b' and 'o' and 'x'
-
-
-
+              
+              
+              
               // (you should then see a box facing you)
               // click below for the next tutorial
               // next-tutorial:some_notes
               """
-
+    
       @programs.tutorials.somenotesTutorial =
         submenu: "Intro"
         title: "some notes"
@@ -592,13 +626,13 @@ define [
               // the syntax is similar to Coffeescript
               // and the commands are almost
               // like Processing.
-
+              
               // If this doesn't make sense to you
               // don't worry.
-
+              
               // next-tutorial:rotate
               """
-
+    
       @programs.tutorials.rotateTutorial =
         submenu: "Intro"
         title: "a taste of animation"
@@ -607,31 +641,31 @@ define [
               // let's rotate it:
               // type 'rotate 1' in the
               // line before the 'box'
-
-
+              
+              
               box
-
+              
               // click for the next tutorial:
               // next-tutorial:frame
               """
-
+    
       @programs.tutorials.frameTutorial =
         submenu: "Animation"
         title: "frame"
         code: """
               // make the box spin
               // by replacing '1' with 'frame'
-
+              
               rotate 1
               box
-
+              
               // 'frame' contains a number
               // always incrementing as
               // the screen is re-drawn.
               // (use 'frame/100' to slow it down)
               // next-tutorial:time
               """
-
+    
       @programs.tutorials.timeTutorial =
         submenu: "Animation"
         title: "time"
@@ -640,10 +674,10 @@ define [
               // faster computers will make
               // the cube spin too fast.
               // Replace it with 'time/2'.
-
+              
               rotate frame/100
               box
-
+              
               // 'time' counts the
               // number of seconds since
               // the program started, so it's
@@ -651,43 +685,43 @@ define [
               // the computer is at drawing.
               // next-tutorial:move
               """
-
+    
       @programs.tutorials.moveTutorial =
         submenu: "Placing things"
         title: "move"
         code: """
               // you can move any object
               // by using 'move'
-
+              
               box
               move 1,1,0
               box
-
+              
               // try to use a rotate before
               // the first box to see how the
               // scene changes.
               // next-tutorial:scale
               """
-
+    
       @programs.tutorials.scaleTutorial =
         submenu: "Placing things"
         title: "scale"
         code: """
               // you can make an object bigger
               // or smaller by using 'scale'
-
+              
               rotate 3
               box
               move 1
               scale 2
               box
-
+              
               // try to use scale or move before
               // the first box to see how the
               // scene changes.
               // next-tutorial:times
               """
-
+    
       @programs.tutorials.timesTutorial =
         submenu: "Repeating stuff"
         title: "times"
@@ -695,29 +729,29 @@ define [
               // 'times' (not to be confused with
               // 'time'!) can be used to
               // repeat operations like so:
-
+              
               rotate 1
               3 times
               ▶move 0.2,0.2,0.2
               ▶box
-
+              
               // note how the tabs indicate
               // exactly the block of code
               // to be repeated.
               // next-tutorial:fill
               """
-
+    
       @programs.tutorials.fillTutorial =
         submenu: "Graphics"
         title: "fill"
         code: """
               // 'fill' changes the
               // color of all the faces:
-
+              
               rotate 1
               fill 255,255,0
               box
-
+              
               // the three numbers indicate
               // red green and blue values.
               // You can also use color names such as 'indigo'
@@ -725,19 +759,19 @@ define [
               // 'angleColor'
               // next-tutorial:stroke
               """
-
+    
       @programs.tutorials.strokeTutorial =
         submenu: "Graphics"
         title: "stroke"
         code: """
               // 'stroke' changes all the
               // edges:
-
+              
               rotate 1
               strokeSize 5
               stroke 255,255,255
               box
-
+              
               // the three numbers are RGB
               // but you can also use the color names
               // or the special color 'angleColor'
@@ -745,7 +779,7 @@ define [
               // to specify the thickness.
               // next-tutorial:color_names
               """
-
+    
       @programs.tutorials.colornamesTutorial =
         submenu: "Graphics"
         title: "color by name"
@@ -755,16 +789,16 @@ define [
               //fill greenyellow
               //fill indigo
               //fill lemonchiffon // whaaaat?
-
+              
               rotate 1
               box
-
+              
               // more color names here:
               // http://html-color-codes.info/color-names/
               // (just use them in lower case)
               // next-tutorial:lights
               """
-
+    
       @programs.tutorials.lightsTutorial =
         submenu: "Graphics"
         title: "lights"
@@ -772,73 +806,73 @@ define [
               // 'ambientLight' creates an
               // ambient light so things have
               // some sort of shading:
-
+              
               ambientLight 0,255,255
               rotate time
               box
-
+              
               // you can turn that light on and
               // off while you build the scene
               // by using 'lights' and 'noLights'
               // next-tutorial:background
               """
-
+    
       @programs.tutorials.backgroundTutorial =
         submenu: "Graphics"
         title: "background"
         code: """
               // 'background' creates a
               // solid background:
-
+              
               background 0,0,255
               rotate time
               box
-
+              
               // next-tutorial:gradient
               """
-
+    
       @programs.tutorials.gradientTutorial =
         submenu: "Graphics"
         title: "gradient"
         code: """
               // even nicer, you can paint a
               // background gradient:
-
+              
               simpleGradient color(190,10,10),color(30,90,100),color(0)
               rotate time
               box
-
+              
               // next-tutorial:line
               """
-
+    
       @programs.tutorials.lineTutorial =
         submenu: "Graphics"
         title: "line"
         code: """
               // draw lines like this:
-
+              
               20 times
               ▶rotate time/9
               ▶line
-
+              
               // next-tutorial:ball
               """
-
+    
       @programs.tutorials.ballTutorial =
         submenu: "Graphics"
         title: "ball"
         code: """
               // draw balls like this:
-
+              
               ballDetail 10
               3 times
               ▶move 0.2,0.2,0.2
               ▶ball
-
+              
               // ('ballDetail' is optional)
               // next-tutorial:pushpopMatrix
               """
-
+    
       @programs.tutorials.pushpopMatrixTutorial =
         submenu: "Graphics"
         title: "push and pop"
@@ -847,7 +881,7 @@ define [
               // the position, which you can
               // return to later by using popMatrix.
               // You can reset using 'resetMatrix'.
-
+              
               rotate time
               pushMatrix // bookmark the position after the rotation
               line
@@ -860,36 +894,36 @@ define [
               line // not affected by initial rotation
               // next-tutorial:animation_style
               """
-
+    
       @programs.tutorials.animationstyleTutorial =
         submenu: "Graphics"
         title: "animation style"
         code: """
               // try uncommenting either line
               // with the animationStyle
-
+              
               background 255
               //animationStyle motionBlur
               //animationStyle paintOver
               rotate frame/10
               box
-
+              
               // next-tutorial:do_once
               """
-
+    
       @programs.tutorials.doonceTutorial =
         submenu: "Controlling flow"
         title: "do once"
         code: """
               // delete either check mark below
-
+              
               rotate time
               ✓doOnce
               ▶background 255
               ▶fill 255,0,0
               ✓doOnce ball
               box
-
+              
               // ...the line or block of code
               // are ran one time only, after that the
               // check marks immediately re-appear
@@ -897,7 +931,7 @@ define [
               // on that first check mark for seizures.
               // next-tutorial:conditionals
               """
-
+    
       @programs.tutorials.conditionalsTutorial =
         submenu: "Controlling flow"
         title: "conditionals"
@@ -906,7 +940,7 @@ define [
               // (or in general do different things)
               // based on any
               // test condition you want:
-
+              
               rotate
               if frame%3 == 0
               ▶box
@@ -914,17 +948,17 @@ define [
               ▶ball
               else
               ▶peg
-
+              
               // next-tutorial:autocode
               """
-
+    
       @programs.tutorials.autocodeTutorial =
         submenu: "Others"
         title: "autocode"
         code: """
               // the Autocode button invents random
               // variations for you.
-
+              
               // You can interrupt the Autocoder at
               // any time by pressing the button again,
               // or you can press CTRL-Z
@@ -933,6 +967,15 @@ define [
               // if you see that things got
               // boring down a particular path of changes.
               """
+    kickOff: ->
+      setInterval(
+        ()=>
+          @pollHash()
+        , 100)
+      # Setup Event Listeners
+      @eventRouter.addListener("url-hash-changed", (hash) =>
+        @loadAppropriateDemoOrTutorialBasedOnHash hash
+      )
 
     loadDemoOrTutorial: (demoName) ->
       if (not Detector.webgl or @liveCodeLabCoreInstance.threeJsSystem.forceCanvasRenderer) \
@@ -954,8 +997,8 @@ define [
         """
         // This drawing makes much more sense
         // in a WebGL-enabled browser.
-
-
+        
+        
         """
 
       # Note that setting the value of the texteditor (texteditor.setValue below)
@@ -999,7 +1042,7 @@ define [
 
     loadAppropriateDemoOrTutorialBasedOnHash: (hash) ->
       matched = hash.match(/bookmark=(.*)/)
-
+      
       if matched
         @loadDemoOrTutorial matched[1]
       else
@@ -1007,7 +1050,7 @@ define [
         @texteditor.setValue ""
         # reset undo history
         setTimeout((()=>@texteditor.clearHistory()),30)
-
+    
     # this paragraph from http://stackoverflow.com/a/629817
     # there are more elegant ways to track back/forward history
     # but they are more complex than this. I don't mind having a bit of
@@ -1015,7 +1058,7 @@ define [
     pollHash: ->
       if @lastHash isnt location.hash
         @lastHash = location.hash
-
+        
         # hash has changed, so do stuff:
         @loadAppropriateDemoOrTutorialBasedOnHash @lastHash
 

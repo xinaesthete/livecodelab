@@ -1,7 +1,7 @@
 Performance considerations i.e. how to get 60 fps.
 ==============
 
-If LiveCodeLab is not running at 60 fps there could be 3 limiting factors. Here is a description of those possible bottlenecks with solutions/workarounds.
+If LiveCodeLab is not running at least at 40 fps there could be 3 limiting factors. Here is a description of those possible bottlenecks with solutions/workarounds.
 
 1. **Low-power devices**. For example we've noticed that on Chrome on Macbook Air, requestAnimationFrame doesn't "serve" more than 30 fps even for very "light" scenes (e.g. one line). This is likely an explicit sw constraint, probably because of battery/heat management. Same on some tablets. This could be worked around by triggering the frames via timeouts rather than requestAnimationFrame (but this setting is not currently exposed to the user). Or maybe via some settings in the browser (unknown to us at the moment).
 2. **CPU/memory**. It could be that the running program does a lot of calculations or creates/destroys a lot of memory. For example it might be creating and initialising long arrays 30 times per second. The solution in this case is to slim down the program, or to use a browser with a fast and efficient javascript implementation.
@@ -13,7 +13,8 @@ If LiveCodeLab is not running at 60 fps there could be 3 limiting factors. Here 
 There are three possible solutions to the fill bottleneck:
  - confirm that the browser supports WebGl. Firefox and Chrome can support WebGL on many HW configurations, but even mainstream HW can sometimes lack support in some browser/OS versions. WebGL support on Linux systems is somewhat spotty, because of the point below:
  - confirm that your OS has drivers that support OpenGL ES > 2.0 hardware acceleration for your graphic card. Updating to recent OS versions and checking the site of your graphic card vendor for recent drivers might do the trick.
- -  reduce the number of pixels being drawn / surface extents in the scene. This can be achieved by either:
+ - reduce the number of pixels being drawn / surface extents in the scene. This can be achieved by either:
+     - on Retina Display macs, go to System Preferences -> Displays -> Scaled Resolution and set to "Larger Text"
      - reducing the size of the models being painted on screen
      - reducing the size of the browser window (and restarting livecodelab)
      - reducing the size of the browser window and "zoom-in" - this can be done on macs by doing CTRL + mouse-scroll-up
