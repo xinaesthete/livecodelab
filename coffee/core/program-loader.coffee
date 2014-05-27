@@ -58,21 +58,21 @@ define [
         title: "Functions"
         code: """
                   //exercise: change this to draw a variable number of boxes...
-                  boxes = () ->
+                  boxes = ->
                   ▶5 times ->
                   ▶▶move g('moveX'), g('moveY')
                   ▶▶rotate g('rotX'), g('rotY')
                   ▶▶box
 
                   scale 0.2
-                  boxes()
+                  boxes
 
                   //notice that these transformations still encorporate the combined
                   //effect of transforms from the boxes function...
                   //resetMatrix //uncommenting this line will counter-act that...
                   //...but it will also loose the initial scale...
                   move 2, 0
-                  boxes()
+                  boxes
               """
 
       @programs.demos.feedback =
@@ -87,7 +87,7 @@ define [
                   animSpeed 0.1
 
                   ✓doOnce
-                  ▶mutateDir 0.5
+                  ▶mutate 0.5
 
                   move 0, -1
                   ▶box 0.3, 1, 0.1
@@ -120,7 +120,7 @@ define [
                   rotate 0, 0, -0.6
                   ▶box 1.6
 
-                  30 times->
+                  30 times
                   ▶scale 0.8
                   ▶i++
                   ▶fill g('r'+i)*255, g('g'+i)*255, g('b'+i)*255, g('a'+i, 150, 255)
@@ -138,11 +138,13 @@ define [
                   //a thought/exercise: how about spiky tendrils?
                   //or making this the head of a creature...
                   ambientLight
-                  animSpeed 0.4
+                  animSpeed 0.01
+
+                  ✓doOnce mutate 1
 
                   arm = (rx, ry) ->
                   ▶scale 1
-                  ▶▶15 times ->
+                  ▶▶15 times
                   ▶▶▶//notice that the g('m') will have the same value for all parts of all arms
                   ▶▶▶move g('m')
                   ▶▶▶rotate rx, ry
@@ -152,7 +154,7 @@ define [
                   scale 0.2
                   nArms = (n, id) ->
                   ▶i = 0
-                  ▶n times ->
+                  ▶n times
                   ▶▶i++
                   ▶▶rotate 0, 0, 2*Math.PI/n
                   ▶▶//each arm is given unique genes for rx & ry

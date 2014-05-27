@@ -88,9 +88,13 @@
 ## When an object is created, it must be first rendered with the most complex
 ## material, because internally in Three.js/WebGL memory is allocated only once.
 ## So a special mechanism is put in place by which new objects are drawn with
-## the normalMaterial with scale 0 (which so far is the most complex
+## the feedbackLambertMaterial with scale 0 (which so far is the most complex
 ## material we apply), so they are rendered but they are invisible.
 ## In the next frame (i.e. after the first render) the correct material is used.
+## Note (pjt) it should be possible to flag the geometry to update missing
+## attributes if switching to a more complex material.
+
+
 
 ## "Spinning"
 ## ----------------------
@@ -182,7 +186,14 @@ define () ->
       # detail levels of balls.
       # Todo: note this doesn't work if we decide that
       # other primitives have a detail level...
+      # PJT: Which well we might, as we'd rather like to have eg. tori / icosahedrons
+      # In the case of tori, it may be better to have dynamic geometry rather than
+      # THREE.TorusGeometry, so that it can be effectively parametrically controlled...
+      # which further leads us to the more general case of parametric geometry...
+      # @primitiveTypes.torus = numberOfPrimitives++
+      # @primitiveTypes.dodecahedron = numberOfPrimitives++
       @primitiveTypes.ball = numberOfPrimitives++
+
 
       @angleColor = @colourLiterals.getColour('angleColor')
 
@@ -236,8 +247,10 @@ define () ->
       @geometriesBank[@primitiveTypes.box] = new @liveCodeLabCore_three.CubeGeometry(1 * boxProportion, 1 * boxProportion, 1 * boxProportion)
       @geometriesBank[@primitiveTypes.peg] =
         new @liveCodeLabCore_three.CylinderGeometry(0.5 * pegProportion, 0.5 * pegProportion, 1 * pegProportion, 32)
+      # @geometriesBank[@primitiveType.torus] = new @liveCodeLabCore_three.
 
       # creating ball geometries
+      # why not "in [@minimumBallDetail...@maximumBallDetail]"?
       for i in [0...(@maximumBallDetail - @minimumBallDetail + 1)]
         @geometriesBank[@primitiveTypes.ball + i] =
           new @liveCodeLabCore_three.SphereGeometry(

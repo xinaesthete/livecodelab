@@ -112,7 +112,7 @@ define [
         screenPass = undefined
         renderModel = undefined
         renderTargetParameters =
-          format: liveCodeLabCore_three.RGBFormat
+          format: liveCodeLabCore_three.RGBAFormat
           stencilBuffer: true
           generateMipmaps: false
           minFilter: liveCodeLabCore_three.LinearFilter
