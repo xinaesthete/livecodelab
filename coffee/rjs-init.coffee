@@ -18,7 +18,7 @@ requirejs.config(
     'sooperfish': 'lib/jquery.sooperfish'
     'mousewheel': 'lib/mousewheel'
     'pulse': 'lib/pulse'
-    'threejs': 'lib/three.53'
+    'threejs': 'lib/three.min'
 
     'Three.Detector': 'lib/three.js/Detector'
     'Three.ShaderExtras': 'lib/three.js/ShaderExtras'
@@ -86,4 +86,3 @@ require [
 ) ->
 
   #console.log('Live Code Lab Loaded')
-
