@@ -336,7 +336,7 @@ define () ->
       if @feedbackStack.length
         @doFeedback = @feedbackStack.pop()
       else
-        @resetStrokeStack()
+        @resetFeedbackStack()
 
     addToScope: (scope) ->
 
@@ -1019,23 +1019,23 @@ define () ->
     feedback: (a) ->
       if isFunction a then appendedFunction = a
       if appendedFunction?
-        @pushFeedback true
+        @pushFeedback @doFeedback
 
       @doFeedback = true
 
       if appendedFunction?
         appendedFunction()
-        @popFeedback
+        @popFeedback()
 
     noFeedback: (a) ->
       if isFunction a then appendedFunction = a
       if appendedFunction?
-        @pushFeedback false
+        @pushFeedback @doFeedback
 
       @doFeedback = false
 
       if appendedFunction?
         appendedFunction()
-        @popFeedback
+        @popFeedback()
 
   GraphicsCommands
