@@ -173,8 +173,15 @@ define () ->
     lastPositionOfPrimitiveType: []
     numberOfOverlappingPrimitives: []
 
+    # we can avoid invoking render() is there are
+    # two consecutive frames where no object-drawing
+    # primitives are invoked so we use these to keep
+    # track of of that.
+    atLeastOneObjectIsDrawn: false
+    atLeastOneObjectWasDrawn: false
+    
     constructor: (@liveCodeLabCore_three, @liveCodeLabCoreInstance, @colourLiterals) ->
-
+      
       numberOfPrimitives = 0
       @primitiveTypes.ambientLight = numberOfPrimitives++
       @primitiveTypes.line = numberOfPrimitives++
@@ -186,28 +193,21 @@ define () ->
       # detail levels of balls.
       # Todo: note this doesn't work if we decide that
       # other primitives have a detail level...
-      # PJT: Which well we might, as we'd rather like to have eg. tori / icosahedrons
-      # In the case of tori, it may be better to have dynamic geometry rather than
-      # THREE.TorusGeometry, so that it can be effectively parametrically controlled...
-      # which further leads us to the more general case of parametric geometry...
-      # @primitiveTypes.torus = numberOfPrimitives++
-      # @primitiveTypes.dodecahedron = numberOfPrimitives++
       @primitiveTypes.ball = numberOfPrimitives++
 
-
       @angleColor = @colourLiterals.getColour('angleColor')
-
+      
       # apparently in Coffeescript I can't initialise fields in the section
       # before the constructor, so initialising them here in the constructor
       @objectPools[@primitiveTypes.line] = []
       @objectPools[@primitiveTypes.rect] = []
       @objectPools[@primitiveTypes.box] = []
       @objectPools[@primitiveTypes.peg] = []
-
+      
       # creating ball pools
       for i in [0...(@maximumBallDetail - @minimumBallDetail + 1)]
         @objectPools[@primitiveTypes.ball + i] = []
-
+      
       ###
       Since you can't change the geometry of an object once it's created, we keep
       around a pool of objects for each mesh type. There is one pool for lines,
@@ -229,7 +229,7 @@ define () ->
       be used in a session) then one could leave all these arrays undefined
       and define them at runtime only when needed.
       ###
-
+      
       # these set the relative size of the
       # primitibes in respect to the box
       boxProportion = 1
@@ -256,7 +256,7 @@ define () ->
         @geometriesBank[@primitiveTypes.ball + i] =
           new @liveCodeLabCore_three.SphereGeometry(
             1 * ballProportion, @minimumBallDetail + i, @minimumBallDetail + i)
-
+      
       # creating a place to remember where
       # each primitive was placed last and how
       # many of them are overlapping so far
@@ -288,7 +288,7 @@ define () ->
       @fillStack.push currentFillColor
       @fillStack.push currentFillAlpha
       @fillStack.push doFill
-
+      
 
     pushStroke: (defaultNormalStroke,currentStrokeColor,currentStrokeAlpha, doStroke)->
       if @liveCodeLabCoreInstance.animationLoop.noDrawFrame
@@ -358,10 +358,15 @@ define () ->
       a, b, c, primitiveProperties, strokeTime, colorToBeUsed,
       alphaToBeUsed, applyDefaultNormalColor, feedbackToBeUsed) ->
 
+      # we can avoid invoking render() is there are
+      # no objects being drawn so let's keep track
+      # of that.
+      @atLeastOneObjectIsDrawn = true
+
       objectIsNew = false
       pooledObjectWithMaterials = undefined
       theAngle = undefined
-
+      
       # the primitiveID is used to index three arrays:
       #   array of caches (pools) of objects
       #   array of caches (pools) of geometries
@@ -374,11 +379,11 @@ define () ->
       objectPool = @objectPools[primitiveID]
       pooledObjectWithMaterials = objectPool[@objectsUsedInFrameCounts[primitiveID]]
       if not pooledObjectWithMaterials?
-
+        
         # each pooled object contains a geometry, and all the materials it could
         # ever need.
         pooledObjectWithMaterials =
-
+          
           # The line material is specifically made for lines. So for lines
           # we have to simulate manually the effect that the other materials
           # have on the solids.
@@ -388,13 +393,13 @@ define () ->
           # won't ever have the lineMaterial, but this initialisation costs
           # nothing and makes the code cleaner.
           lineMaterial: undefined
-
+          
           # The basic material is for simple solid fill without lighting
           basicMaterial: undefined
-
+          
           # The Lambert material is for fill with lighting
           lambertMaterial: undefined
-
+          
           # The normalMaterial is the trippy fill with each side of the cube
           # being a bright color (the default one).
           # Note that the first time we render an object we need to
@@ -427,7 +432,7 @@ define () ->
         if not pooledObjectWithMaterials.lineMaterial?
           pooledObjectWithMaterials.lineMaterial =
             new @liveCodeLabCore_three.LineBasicMaterial()
-
+        
         # associating normal material to threejs' Object3D
         if @currentStrokeColor is @angleColor or @defaultNormalStroke
           theAngle =
@@ -448,6 +453,7 @@ define () ->
       else if objectIsNew or (
         feedbackToBeUsed and @liveCodeLabCoreInstance.lightSystem.lightsAreOn
       )
+        
         # the first time we render a an object we need to
         # render it with the material that takes the
         # bigger buffer space, see:
@@ -534,7 +540,7 @@ define () ->
         @liveCodeLabCoreInstance.matrixCommands.rotate \
           pooledObjectWithMaterials.initialSpinCountdown / 50
 
-
+      
       ###
       see
       https://github.com/mrdoob/three.js/wiki/Using-Matrices-&-Object3Ds-in-THREE
@@ -552,7 +558,7 @@ define () ->
           pooledObjectWithMaterials.initialSpinCountdown > 0
         @liveCodeLabCoreInstance.matrixCommands.popMatrix()
 
-      if objectIsNew
+      if objectIsNew        
         # if the object is new it means that the normal material
         # is applied to it, no matter what the current settings of fill
         # and lights are. So we make objects invisible in their very first
@@ -638,7 +644,7 @@ define () ->
         c = 1
       else if isFunction d
         appendedFunction = d
-
+      
       # Simple case - if there is no fill and
       # no stroke then there is nothing to do.
       # Also, even if we aren'd under a noFill command spell, some geometries
@@ -670,14 +676,14 @@ define () ->
           @defaultNormalFill, @doFeedback
         )
       else if (not @doFill or not primitiveProperties.canFill) and @doStroke
-
+        
         # only doing the stroke
         @createObjectIfNeededAndDressWithCorrectMaterial(
           a, b, c, primitiveProperties, true,
           @currentStrokeColor, @currentStrokeAlpha,
           @defaultNormalStroke
         )
-
+      
       # doing both the fill and the stroke
       else
         @createObjectIfNeededAndDressWithCorrectMaterial(
@@ -695,6 +701,12 @@ define () ->
       return
 
     reset: ->
+
+      # we can avoid invoking render() is there are
+      # no objects being drawn so let's keep track
+      # of that.
+      @atLeastOneObjectIsDrawn = false
+
       @resetFillStack()
       @resetStrokeStack()
       @resetFeedbackStack()
@@ -708,12 +720,12 @@ define () ->
       @objectsUsedInFrameCounts[@primitiveTypes.rect] = 0
       @objectsUsedInFrameCounts[@primitiveTypes.box] = 0
       @objectsUsedInFrameCounts[@primitiveTypes.peg] = 0
-
+      
       # initialising ball counts
       for i in [0...(@maximumBallDetail - @minimumBallDetail + 1)]
         @objectsUsedInFrameCounts[@primitiveTypes.ball + i] = 0
 
-
+    
     # TODO Note that lines have a "solid fill" mode
     # and something similar to the normalMaterial mode
     # but there is no equivalent to the lambert material
@@ -723,7 +735,7 @@ define () ->
     # (although which ambient light do you pick if there
     # is more than one?)
     line: (a, b, c, d = null) ->
-
+      
       # lines can only have one material, which is LineBasicMaterial
       # which doesn't react to lights (as opposed to MeshLambertMaterial, which
       # only applies to meshes).
@@ -741,7 +753,7 @@ define () ->
         @doFill = rememberIfThereWasAFill
         @currentStrokeSize = rememberPreviousStrokeSize
         return
-
+      
       # primitive-specific initialisations:
       primitiveProperties =
         canFill: false
@@ -750,7 +762,7 @@ define () ->
         threeObjectConstructor: @liveCodeLabCore_three.Line
         detailLevel: 0
 
-
+      
       # end of primitive-specific initialisations:
       @commonPrimitiveDrawingLogic a, b, c, d, primitiveProperties
 
@@ -763,7 +775,7 @@ define () ->
         threeObjectConstructor: @liveCodeLabCore_three.Mesh
         detailLevel: 0
 
-
+      
       # end of primitive-specific initialisations:
       @commonPrimitiveDrawingLogic a, b, c, d, primitiveProperties
 
@@ -775,7 +787,7 @@ define () ->
         sidedness: @liveCodeLabCore_three.FrontSide
         threeObjectConstructor: @liveCodeLabCore_three.Mesh
         detailLevel: 0
-
+      
       # end of primitive-specific initialisations:
       @commonPrimitiveDrawingLogic a, b, c, d, primitiveProperties
 
@@ -788,7 +800,7 @@ define () ->
         threeObjectConstructor: @liveCodeLabCore_three.Mesh
         detailLevel: 0
 
-
+      
       # end of primitive-specific initialisations:
       @commonPrimitiveDrawingLogic a, b, c, d, primitiveProperties
 
@@ -807,15 +819,15 @@ define () ->
         threeObjectConstructor: @liveCodeLabCore_three.Mesh
         detailLevel: @ballDetLevel - @minimumBallDetail
 
-
+      
       # end of primitive-specific initialisations:
       @commonPrimitiveDrawingLogic a, b, c, d, primitiveProperties
 
-
+    
     # Modified from Processing.js
     fill: (r, g, b, a, f) ->
 
-      #console.log "fill-1 " + r + " " + g + " " + b + " " + a + " "
+      #console.log "fill-1 " + r + " " + g + " " + b + " " + a + " "  
 
       if typeof r isnt "number"
         if isFunction r then appendedFunction = r
@@ -861,7 +873,7 @@ define () ->
         @currentFillColor = @liveCodeLabCoreInstance.colourFunctions.color(r, g, b)
         @currentFillAlpha = @liveCodeLabCoreInstance.colourFunctions.alphaZeroToOne(@liveCodeLabCoreInstance.colourFunctions.color(r, g, b, a))
       else
-
+        
         # we keep track of the "normal fill" flag and the fill color
         # separately because
         # we can do some smart optimisation later
@@ -884,7 +896,7 @@ define () ->
     The noFill() function disables filling geometry.
     If both <b>noStroke()</b> and <b>noFill()</b>
     are called, no shapes will be drawn to the screen.
-
+    
     @see #fill()
     ###
     noFill: (a)->
@@ -898,9 +910,9 @@ define () ->
 
       if appendedFunction?
         appendedFunction()
-        @popFill()
+        @popFill()    
 
-
+    
     ###
     The stroke() function sets the color used to
     draw lines and borders around shapes.
@@ -918,7 +930,7 @@ define () ->
     <br><br>The value for the parameter "gray" must be less than or equal
     to the current maximum value as specified by <b>colorMode()</b>.
     The default maximum value is 255.
-
+    
     @param {int|float} gray    number specifying value between white and black
     @param {int|float} value1  red or hue value
     @param {int|float} value2  green or saturation value
@@ -927,7 +939,7 @@ define () ->
     @param {Color} color       any value of the color datatype
     @param {int} hex           color value in hex notation
                                (i.e. #FFCC00 or 0xFFFFCC00)
-
+    
     @see #fill()
     @see #noStroke()
     @see #tint()
@@ -964,7 +976,7 @@ define () ->
         @currentStrokeColor = @liveCodeLabCoreInstance.colourFunctions.color(r, g, b)
         @currentStrokeAlpha = @liveCodeLabCoreInstance.colourFunctions.alphaZeroToOne(@liveCodeLabCoreInstance.colourFunctions.color(r, g, b, a))
       else
-
+        
         # we keep track of the "normal stroke" flag and the stroke color
         # separately because
         # we can do some smart optimisation later
@@ -980,12 +992,12 @@ define () ->
       if appendedFunction?
         appendedFunction()
         @popStroke()
-
+    
     ###
     The noStroke() function disables drawing the stroke (outline).
     If both <b>noStroke()</b> and <b>noFill()</b> are called, no shapes
     will be drawn to the screen.
-
+    
     @see #stroke()
     ###
     noStroke: (a)->
@@ -1039,3 +1051,4 @@ define () ->
         @popFeedback()
 
   GraphicsCommands
+
