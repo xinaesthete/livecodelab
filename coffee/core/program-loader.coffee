@@ -155,6 +155,62 @@ define [
                   nArms(20, 'a')
               """
 
+      @programs.demos.parmlsys =
+        submenu: "Evolutionary"
+        title: "Parametric L-System"
+        code: """
+                  PI = Math.PI
+                  rule = "Fx-[[FX]+][+FX]+X"
+                  background white
+                  F = ->
+                  ▶rotate g('wx', -0.1, 0.1), g('wy', -0.1, 0.1), g('wz', -0.1, 0.1)
+                  ▶move 0, 0.3
+                  ▶fill black ball 0.03, 0.6, 0.03
+                  ▶move 0, 0.3
+                  L = ->
+                  ▶scale g('Ls', 0.6, 1.02)
+                  ▶rotate 0, 0, -g('bendl') * PI/6
+                  R = ->
+                  ▶scale g('Rs', 0.6, 1.02)
+                  ▶rotate g('brx')*PI/6, g('bry')*PI/6, g('brz')*PI/6
+                  leaf = -> ball 0.1, 0.2, 0.1
+
+                  limit = min(abs(8-time*10%16), 4.5)
+                  //n keeps track of recursion depth
+                  X = (n) ->
+                  ▶fraction = if n > limit - 1 then pow(limit - floor(limit), 0.3) else 1
+                  ▶if n++ > limit then leaf
+                  ▶else scale fraction, doOp c, n for c in rule
+
+                  animSpeed 0.01
+                  ✓doOnce
+                  ▶mutate 1
+                  //sempre idem, sed non eodum modo
+                  //always the same,
+                  //but never in the same way
+                  if limit <0.2 then mutate 1
+
+                  doOp = (c, n=0) ->
+                  ▶switch c
+                  ▶▶when 'F' then F
+                  ▶▶when '-' then L
+                  ▶▶when '+' then R
+                  ▶▶when '[' then pushMatrix
+                  ▶▶when ']' then popMatrix
+                  ▶▶when 'X' then X n
+                  ▶▶when '(' then stroke green, 100, fill cyan, 80, ball 0.5 rotate move 0, 2, ball 0.1, 0.2, 0.1
+                  ▶▶else rotate 0, 0, PI, fill g('fr')*255, g('fg')*255, g('fb')*255, 200 feedback box 2, 2, 0.2
+
+                  noStroke
+                  scale 0.7
+                  3 times
+                  ▶pushMatrix
+                  ▶doOp "X"
+                  ▶popMatrix
+                  ▶rotate 0, 0, 2*PI/3
+              """
+
+
       @programs.demos.roseDemo =
         submenu: "Basic"
         title: "Rose"
