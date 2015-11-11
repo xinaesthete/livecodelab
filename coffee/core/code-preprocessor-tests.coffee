@@ -2213,7 +2213,7 @@ define ['core/code-preprocessor-tests'], (foo) ->
          expected: """
                    a = box
                    noFill()
-                   rotate -> run a -> scale 2, -> run a
+                   rotate -> run -> a -> scale 2, -> run a
                    """
          notIdempotent: true
          failsMootAppends: true
@@ -3075,7 +3075,7 @@ define ['core/code-preprocessor-tests'], (foo) ->
                    peg()
 
                    a = ((parametersForBracketedFunctions) -> (move 1, -> (if parametersForBracketedFunctions? then parametersForBracketedFunctions() else null)))
-                   box a -> ball()
+                   box -> a ball
                    """
          notIdempotent: true
          failsMootAppends: true
@@ -3091,7 +3091,7 @@ define ['core/code-preprocessor-tests'], (foo) ->
                    """
          expected: """
                    above = ((parametersForBracketedFunctions) -> (move 0,-0.5,0, -> (if parametersForBracketedFunctions? then parametersForBracketedFunctions() else null)))
-                   box above -> ball above -> peg()
+                   box -> above -> ball -> above peg
                    """
          notIdempotent: true
          failsMootAppends: true
@@ -3112,8 +3112,164 @@ define ['core/code-preprocessor-tests'], (foo) ->
                    """
          notIdempotent: false
          failsMootAppends: false
+        ,
+         notes:    """
+                   tests avoidLastArgumentInvocationOverflowing
+                   substitutions also work with a dangling
+                   functions
+                   """
+         input:    """
+                   scale 2, wave time peg
+                   ▶scale ball
+                   """
+         expected: """
+                   scale 2, wave(time), -> peg ->
+                   ▶scale ball
+                   """
+         notIdempotent: false
+         failsMootAppends: false
+        ,
+         notes:    """
+                   tests avoidLastArgumentInvocationOverflowing
+                   substitutions also work with a dangling
+                   functions
+                   """
+         input:    """
+                   scale 2, wave 2 peg
+                   ▶scale 2, wave 2 ball
+                   """
+         expected: """
+                   scale 2, wave(2), -> peg ->
+                   ▶scale 2, wave(2), ball
+                   """
+         notIdempotent: false
+         failsMootAppends: false
+        ,
+         notes:    """
+                   """
+         input:    """
+                   flashing = <if random > 0.5 then rotate else scale>
+                   flashing ball
+                   box
+                   """
+         expected: """
+                   flashing = ifFunctional(random() > 0.5 ,rotate, scale)
+                   flashing ball
+                   box()
+                   """
+         notIdempotent: false
+         failsMootAppends: false
+        ,
+         notes:    """
+                   """
+         input:    """
+                   flashing = <if random > 0.5 then scale 0>
+                   flashing ball
+                   box
+                   """
+         expected: """
+                   flashing = ifFunctional(random() > 0.5 ,((parametersForBracketedFunctions) -> (scale 0, -> (if parametersForBracketedFunctions? then parametersForBracketedFunctions() else null))))
+                   flashing ball
+                   box()
+                   """
+         notIdempotent: false
+         failsMootAppends: false
 
+        ,
+         notes:    """
+                   """
+         input:    """
+                   ball
+                   ▶box
+                   """
+         expected: """
+                   ball ->
+                   ▶box()
+                   """
+         notIdempotent: false
+         failsMootAppends: false
 
+        ,
+         notes:    """
+                   """
+         input:    """
+                   flashing = <if random > 0.5 then scale 0>
+                   rotating = <rotate>
+                   flashing
+                   ▶ball
+                   ▶rotating box
+                   rotate 2 peg 0.7
+                   """
+         expected: """
+                   flashing = ifFunctional(random() > 0.5 ,((parametersForBracketedFunctions) -> (scale 0, -> (if parametersForBracketedFunctions? then parametersForBracketedFunctions() else null))))
+                   rotating = rotate
+                   flashing ->
+                   ▶ball()
+                   ▶rotating box
+                   rotate 2, -> peg 0.7
+                   """
+         notIdempotent: false
+         failsMootAppends: false
+        ,
+         notes:    """
+                   """
+         input:    """
+                   flashing = <if random < 0.5 then scale 0 else scale 2>
+                   flashing
+                   ball
+                   """
+         expected: """
+                   flashing = ifFunctional(random() < 0.5 ,((parametersForBracketedFunctions) -> (scale 0, -> (if parametersForBracketedFunctions? then parametersForBracketedFunctions() else null))), ((parametersForBracketedFunctions) -> (scale 2, -> (if parametersForBracketedFunctions? then parametersForBracketedFunctions() else null))))
+                   flashing()
+                   ball()
+                   """
+         notIdempotent: false
+         failsMootAppends: false
+        ,
+         notes:    """
+                   """
+         input:    """
+                   flashing = <if random < 0.5 then scale>
+                   flashing
+                   ball
+                   """
+         expected: """
+                   flashing = ifFunctional(random() < 0.5 ,scale)
+                   flashing()
+                   ball()
+                   """
+         notIdempotent: false
+         failsMootAppends: false
+        ,
+         notes:    """
+                   """
+         input:    """
+                   flashing = <if random < 0.5 then scale 0>
+                   flashing
+                   ball
+                   """
+         expected: """
+                   flashing = ifFunctional(random() < 0.5 ,((parametersForBracketedFunctions) -> (scale 0, -> (if parametersForBracketedFunctions? then parametersForBracketedFunctions() else null))))
+                   flashing()
+                   ball()
+                   """
+         notIdempotent: false
+         failsMootAppends: false
+        ,
+         notes:    """
+                   """
+         input:    """
+                   F = <box> 
+                   a = <F>
+                   run a
+                   """
+         expected: """
+                   F = box 
+                   a = F
+                   run a
+                   """
+         notIdempotent: false
+         failsMootAppends: false
 
       ]
 

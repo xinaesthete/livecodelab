@@ -6,13 +6,44 @@
 ## returned in a dedicated variable.
 ##
 ## In order to run the tests just open the
-## console and type
+## console and type:
 ##   testPreprocessor()
+## or, to run a subset (useful for bisection in case something goes wrong):
+##   testPreprocessor(rangeMin, rangeMax)
 ###
 
 detailedDebug = false
 
 define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocessorTests, ColourLiterals) ->
+
+  # we want to have the following snippet to work:
+  #   flickering = <if random > 0.5 then scale 0>
+  #   flickering
+  #     box
+  #     peg
+  # in order to do that, we need to have "scale 0" inside
+  # that if to take a function (the box/peg block)
+  # in order to do that, we transform the if into
+  #    flickering = ifFunctional(random() > 0.5, scale function taking the block as argument)
+  # so flickering is a function that can take the block as argument.
+  window.ifFunctional = (condition, thenCode, elseCode) ->
+    #console.log "outside: " + thenCode
+    (afterBlocks...) ->
+      #console.log "inside: " + thenCode
+      #console.log "afterBlocks: " + afterBlocks
+      #console.log "condition: " + condition
+      if condition
+        thenCode.apply this, afterBlocks
+      else
+        if elseCode?
+          elseCode.apply this, afterBlocks
+        else
+          # in the example above, flickering might be
+          # called without an argument and without
+          # a block, so check that case
+          if afterBlocks[0]?
+            afterBlocks[0]()
+
 
   class CodePreprocessor
 
@@ -158,12 +189,12 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
       @colorsCommandsRegex = @colorCommands.join "|"
       # make the preprocessor tests easily accessible from
       # the debug console (just type testPreprocessor())
-      window.testPreprocessor = =>
+      window.testPreprocessor =  (rangeMin = undefined, rangeMax = undefined) =>
         # there are far too many tests to
         # keep the debug on
         previousDetailedDebug = detailedDebug
         detailedDebug = false
-        @test()
+        @test(rangeMin, rangeMax)
         detailedDebug = previousDetailedDebug
 
     ###
@@ -514,6 +545,25 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
       if detailedDebug then console.log "simplifyFunctionDoingSimpleInvocation-1:\n" + code + " error: " + error
       return [code, error]
 
+    # sometimes you are left with something like
+    #   a = (F)
+    # where F is a function.
+    # simplify that to
+    #   a = F
+    simplifyFunctionsAloneInParens:(code, error, userDefinedFunctions, bracketsVariables) ->
+      # if there is an error, just propagate it
+      return [undefined, error] if error?
+
+      functionsRegex = @allCommandsRegex + userDefinedFunctions + bracketsVariables
+
+      rx = RegExp("\\([ \\t]*(" + functionsRegex + ")[ \\t]*\\)[ \\t]*$",'gm')
+      console.log rx
+      code = code.replace(rx, "$1")
+
+
+      if detailedDebug then console.log "simplifyFunctionsAloneInParens-1:\n" + code + " error: " + error
+      return [code, error]
+
 
 
     # these transformations are supposed to take as input
@@ -584,7 +634,7 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
       if detailedDebug then console.log "beautifyCode-22:\n" + code + " error: " + error
 
       allFunctionsRegex = @allCommandsRegex + "|" + @expressionsRegex
-      rx = RegExp("\\(("+allFunctionsRegex+")\\)",'g')
+      rx = RegExp("\\( *("+allFunctionsRegex+") *\\)",'g')
       code = code.replace(rx, "$1")
       if detailedDebug then console.log "beautifyCode-23:\n" + code + " error: " + error
 
@@ -870,7 +920,7 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
     # can work. Basically the function inside a needs to
     # be able to accept further functions to be chained.
 
-    adjustFunctionalReferences: (code, error, userDefinedFunctions) ->
+    adjustFunctionalReferences: (code, error, userDefinedFunctions, bracketsVariables) ->
       # if there is an error, just propagate it
       return [undefined, error] if error?
 
@@ -884,7 +934,7 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
       # into
       #  either (-> rotate -> box), (->peg)
       #  either (-> box 2), (->peg 2)
-      expressionsAndUserDefinedFunctionsRegex = @expressionsRegex + userDefinedFunctions
+      expressionsAndUserDefinedFunctionsRegex = @expressionsRegex + userDefinedFunctions + bracketsVariables
       allFunctionsRegex = @allCommandsRegex + "|" + expressionsAndUserDefinedFunctionsRegex
 
       rx = RegExp("<[\\s]*(("+allFunctionsRegex+")[\\t ]*)>",'gm')
@@ -958,6 +1008,10 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
       delimitersForCommands = ":|;|\\,|\\?|\\)|//|\\#|\\s+if|\\s+else|\\s+then"
       delimitersForExpressions = delimitersForCommands + "|" + "\\+|-|\\*|/|%|&|]|<|>|==|!=|>=|<=|!(?![=])|\\s+and\\s+|\\s+or\\s+|\\s+not\\s+|\\|"
 
+      #we don't want the dash of the arrow to count as a minus, so
+      #replacing the arrow with one char
+      code = code.replace(/->/g, "→")
+
       if detailedDebug then console.log "adjustImplicitCalls-4 brackets vars:" + bracketsVariables
       rx = RegExp("([^\\w\\d\\r\\n])("+@allCommandsRegex+bracketsVariables+")[ \\t]*("+delimitersForCommands+")",'g')
       for i in [1..2]
@@ -996,6 +1050,9 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
       # 2 times -> rotate; box
       rx = RegExp("([^\\w\\d\\r\\n])("+allFunctionsRegex+")[ \\t]*$",'gm')
       code = code.replace(rx, "$1$2()")
+
+      code = code.replace(/→/g, "->")
+
       if detailedDebug then console.log "adjustImplicitCalls-7\n" + code + " error: " + error
       return [code, error]
 
@@ -1506,11 +1563,11 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
     # user functions accepting arguments followed by
     # a space, which
     # in this case is 1 (wave)
-    # 2) then 2 closing parens are added before the chaining:
+    # 2) then 1 closing parens is added before the chaining:
     #   rotate 3, wave pulse / 10), -> box 3, 4
     # 3) then an open parens replaces each
     # expression or user function followed by a space:
-    #   rotate 3, wave(pulse / 10)), -> box 3, 4
+    #   rotate 3, wave(pulse / 10), -> box 3, 4
     avoidLastArgumentInvocationOverflowing: (code, error, userDefinedFunctionsWithArguments) ->
       # if there is an error, just propagate it
       return [undefined, error] if error?
@@ -1526,12 +1583,16 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
       rx = RegExp(",\\s*(\\()("+@primitivesRegex+")",'g')
       code = code.replace(rx, ", ->★$2")
 
+      rx = RegExp(", *->",'g')
+      code = code.replace(rx, "☆")
+
       while code != previousCodeTransformations
         previousCodeTransformations = code
 
+
         # find the code between the qualifier and the
         # arrow
-        rx = RegExp("("+qualifyingFunctionsRegex+")(.*)(, *->)",'')
+        rx = RegExp("("+qualifyingFunctionsRegex+")([^☆\\r\\n]*)(☆)",'')
         match = rx.exec code
         
         if not match
@@ -1564,13 +1625,16 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
         # Note that there might be more than one parens to be
         # added for example in
         #   rotate 3, wave wave 2 box 3, 4
-        for i in [0..numOfExpr]
-          rx = RegExp("("+qualifyingFunctionsRegex+")(.*)(("+expsAndUserFunctionsWithArgs+") +)(.*)(, *->)",'')
+        for i in [0...numOfExpr]
+          rx = RegExp("("+qualifyingFunctionsRegex+")([^☆]*)(("+expsAndUserFunctionsWithArgs+") +)([^☆\\r\\n]*)(☆)",'')
           if detailedDebug then console.log "avoidLastArgumentInvocationOverflowing-0 regex: " + rx
           if detailedDebug then console.log "avoidLastArgumentInvocationOverflowing-0 on: " + code
           
-          code = code.replace(rx, "$1$2$4($5, ->")
+          code = code.replace(rx, "$1$2$4($5☆")
 
+        rx = RegExp("("+qualifyingFunctionsRegex+")([^☆]*)(("+expsAndUserFunctionsWithArgs+") *)([^☆\\r\\n]*)(☆)",'')
+        if detailedDebug then console.log "avoidLastArgumentInvocationOverflowing-0.5 regex: " + rx
+        if detailedDebug then console.log "avoidLastArgumentInvocationOverflowing-0.5 on: " + code
         # finally, we change the arrow so that
         # we don't come back to this snippet of code again
         code = code.replace(rx, "$1$2$4$5, →")
@@ -1578,6 +1642,7 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
         if detailedDebug then console.log "avoidLastArgumentInvocationOverflowing-1\n" + code + " error: " + error
         #alert match2 + " num of expr " + numOfExpr + " code: " + code
 
+      code = code.replace(/☆/g, ", ->")
       code = code.replace(/→/g, "->")
       code = code.replace(/, ->★/g, ", (")
 
@@ -1587,6 +1652,22 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
 
       return [code, error]
 
+
+    # see the comment next to ifFunctional definition
+    # to see what we are trying to achieve here.
+    substituteIfsInBracketsWithFunctionalVersion: (code, error) ->
+      # if there is an error, just propagate it
+      return [undefined, error] if error?
+
+      code = code.replace(/(\w+\s*=\s*<\s*if\s*.*)>(.*>)/g, "$1›$2")
+      code = code.replace(/(\w+)\s*=\s*<\s*if\s*(.*)(>)/g, "$1 = ifFunctional($2>)")
+      code = code.replace(/(\w+\s*=\s*ifFunctional\s*.*)then(.*>\))/g, "$1,<$2")
+      code = code.replace(/(\w+\s*=\s*ifFunctional\s*.*)else(.*>\))/g, "$1>, <$2")
+      code = code.replace(/›/g, ">")
+
+      if detailedDebug then console.log "substituteIfsInBracketsWithFunctionalVersion-1\n" + code + " error: " + error
+
+      return [code, error]
 
     preprocess: (code, bracketsVariables) ->
       # we'll keep any errors in here as we transform the code
@@ -1616,6 +1697,9 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
       if detailedDebug then console.log "preprocess-5\n" + code + " error: " + error
       [code, error] = @checkBasicSyntax(code, codeWithoutStringsOrComments, error)
       if detailedDebug then console.log "preprocess-6\n" + code + " error: " + error
+
+      [code, error] = @substituteIfsInBracketsWithFunctionalVersion(code, error)
+      if detailedDebug then console.log "preprocess-6.5\n" + code + " error: " + error
 
       [code, error] = @removeDoubleChevrons(code, error)
       if detailedDebug then console.log "preprocess-7\n" + code + " error: " + error
@@ -1666,7 +1750,7 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
       [code, error] = @addTracingInstructionsToDoOnceBlocks(code, error)
 
       [ignore,a,ignore] = @identifyBlockStarts code, error
-      [code, error] = @completeImplicitFunctionPasses code, a, error, userDefinedFunctionsWithArguments
+      [code, error] = @completeImplicitFunctionPasses code, a, error, userDefinedFunctionsWithArguments, bracketsVariables
       if detailedDebug then console.log "completeImplicitFunctionPasses:\n" + code + " error: " + error
 
       [code, error] = @bindFunctionsToArguments(code, error, userDefinedFunctionsWithArguments)
@@ -1681,7 +1765,7 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
       if detailedDebug then console.log "preprocess-17\n" + code + " error: " + error
       [code, error] = @fleshOutQualifiers(code, error,bracketsVariables, bracketsVariablesArray)
       if detailedDebug then console.log "preprocess-18\n" + code + " error: " + error
-      [code, error] = @adjustFunctionalReferences(code, error, userDefinedFunctions)
+      [code, error] = @adjustFunctionalReferences(code, error, userDefinedFunctions, bracketsVariables)
       if detailedDebug then console.log "preprocess-19\n" + code + " error: " + error
       [code, error] = @addCommandsSeparations(code, error, userDefinedFunctions)
       if detailedDebug then console.log "preprocess-20\n" + code + " error: " + error
@@ -1712,6 +1796,9 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
       [code, error] = @simplifyFunctionDoingSimpleInvocation(code, error, userDefinedFunctions)
       if detailedDebug then console.log "preprocess-29\n" + code + " error: " + error
 
+      [code, error] = @simplifyFunctionsAloneInParens(code, error, userDefinedFunctions, bracketsVariables)
+      if detailedDebug then console.log "preprocess-29.5\n" + code + " error: " + error
+
       [code, error] = @injectStrings(code, stringsTable, error)
       if detailedDebug then console.log "preprocess-29\n" + code + " error: " + error
 
@@ -1720,10 +1807,18 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
 
 
     # to run the tests, just open the dev console
-    # and type: testPreprocessor()
-    test: ->
+    # and type:
+    #    testPreprocessor()
+    # or
+    #    testPreprocessor(rangeMin, rangeMax)
+    test: (rangeMin = undefined, rangeMax = undefined) ->
+        console.log "launching all tests"
         failedTests = successfulTest = knownIssues = failedIdempotency = failedMootAppends = failedMootPrepends = 0
-        for testCaseNumber in [0...@testCases.length]
+        unless rangeMin?
+          rangeMin = 0
+          rangeMax = @testCases.length
+        console.log "launching tests: " + [rangeMin...rangeMax]
+        for testCaseNumber in [rangeMin...rangeMax]
           testCase = @testCases[testCaseNumber]
 
           # just like in demos and tutorials, we use an
@@ -1874,11 +1969,11 @@ define ['core/code-preprocessor-tests', 'core/colour-literals'], (CodePreprocess
       bottomOfProgram = sourceByLine.length-1
       return bottomOfProgram
 
-    completeImplicitFunctionPasses: (code, linesWithBlockStart, error, userDefinedFunctionsWithArguments) ->
+    completeImplicitFunctionPasses: (code, linesWithBlockStart, error, userDefinedFunctionsWithArguments, bracketsVariables) ->
       # if there is an error, just propagate it
       return [undefined, error] if error?
 
-      qualifyingFunctions = @qualifyingCommandsRegex + userDefinedFunctionsWithArguments
+      qualifyingFunctions = @primitivesAndMatrixRegex + userDefinedFunctionsWithArguments + bracketsVariables
 
       sourceByLine = code.split("\n")
       transformedLines = []
