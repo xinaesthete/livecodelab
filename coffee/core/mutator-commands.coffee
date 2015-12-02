@@ -18,6 +18,7 @@ define () ->
       scope.add('mutate',    (delta) => @mutate(delta))
 
     resetFrame: ->
+      $('.dg').css('z-index', 10)
       @geneNamesLastFrame = @geneNamesThisFrame
       @geneNamesThisFrame = []
 
@@ -37,7 +38,7 @@ define () ->
         @currentGenes[name] = random(min, max)
         range = max-min
         @geneDeltas[name] = random(-range, range) / 100
-        @gui.add(@currentGenes, name, min, max)
+        @gui.add(@currentGenes, name, min, max).listen()
 
       old = @currentGenes[name]
       d = @geneDeltas[name] * @animSpeed
