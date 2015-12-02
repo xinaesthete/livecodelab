@@ -8,7 +8,8 @@ define () ->
     # it can detect this and not go along delta
     geneNamesThisFrame: []
     geneNamesLastFrame: []
-
+    gui: new dat.GUI();
+    
     addToScope: (scope) ->
       scope.add('gene',      (name, min, max) => @gene(name, min, max))
       scope.add('g',         (name, min, max) => @gene(name, min, max))
@@ -36,6 +37,7 @@ define () ->
         @currentGenes[name] = random(min, max)
         range = max-min
         @geneDeltas[name] = random(-range, range) / 100
+        @gui.add(@currentGenes, name, min, max)
 
       old = @currentGenes[name]
       d = @geneDeltas[name] * @animSpeed
