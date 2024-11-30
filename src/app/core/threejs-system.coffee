@@ -18,6 +18,7 @@ require '../lib/threejs/postprocessing/ShaderPass'
 class ThreeJsSystem
 
   renderTarget: undefined # used by effects
+  feedbackSavePass: undefined # used by effects
   effectSaveTarget: undefined # used by effects
 
   effectBlend: undefined # used by blend-controls
@@ -87,6 +88,11 @@ class ThreeJsSystem
     @renderPass = new THREE.RenderPass(@scene, @camera)
     @composer.addPass(@renderPass)
 
+    @feedbackSavePass = new THREE.SavePass(
+        new THREE.WebGLRenderTarget(width, height, { depthBuffer: false, clear: false })
+    )
+    @feedbackMap = @feedbackSavePass.renderTarget.texture
+    @composer.addPass(@feedbackSavePass)
 
     # This is where a copy of the rendered scene is going to be saved.
     # Essentially this is the last frame with all the effects.
