@@ -73,7 +73,8 @@ class AnimationLoop
     @matrixCommands,
     @soundSystem,
     @lightSystem,
-    @graphicsCommands
+    @graphicsCommands,
+    @mutatorCommands
   ) ->
 
   addToScope: (scope) ->
@@ -163,6 +164,7 @@ class AnimationLoop
     @graphicsCommands.resetExclusionPrincipleWobbleDataIfNeeded()
 
     @matrixCommands.resetMatrixStack()
+    @mutatorCommands.resetFrame()
 
     # the sound list needs to be cleaned
     # so that the user program can create its own from scratch

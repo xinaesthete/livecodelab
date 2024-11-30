@@ -68,6 +68,7 @@ GraphicsCommands  = require './graphics-commands'
 OtherCommands     = require './other-commands'
 LightsCommands    = require './lights-commands'
 MatrixCommands    = require './matrix-commands'
+MutatorCommands   = require './mutator-commands'
 TimeKeeper        = require './time-keeper'
 Pulse             = require '../lib/pulse'
 Math              = require '../globals/math'
@@ -135,12 +136,14 @@ class LiveCodeLabCore
       @timeKeeper
     )
 
+    @mutatorCommands = new MutatorCommands()
+
     @graphicsCommands = new GraphicsCommands(
       @threeJsSystem,
       @colourFunctions,
       @matrixCommands,
       @colourLiterals,
-      @ #lightSystem
+      this
     )
 
     @lightSystem = new LightsCommands(
@@ -160,7 +163,8 @@ class LiveCodeLabCore
       @matrixCommands,
       @soundSystem,
       @lightSystem,
-      @graphicsCommands
+      @graphicsCommands,
+      @mutatorCommands
     )
 
     @graphicsCommands.addToScope(@globalscope)
@@ -177,6 +181,7 @@ class LiveCodeLabCore
     @programRunner.addToScope(@globalscope)
     @mathFunctions.addToScope(@globalscope)
     @otherCommands.addToScope(@globalscope)
+    @mutatorCommands.addToScope(@globalscope)
 
   paintARandomBackground: ->
     @backgroundPainter.paintARandomBackground()

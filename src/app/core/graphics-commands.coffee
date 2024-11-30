@@ -88,9 +88,13 @@
 ## When an object is created, it must be first rendered with the most complex
 ## material, because internally in Three.js/WebGL memory is allocated only once.
 ## So a special mechanism is put in place by which new objects are drawn with
-## the normalMaterial with scale 0 (which so far is the most complex
+## the feedbackLambertMaterial with scale 0 (which so far is the most complex
 ## material we apply), so they are rendered but they are invisible.
 ## In the next frame (i.e. after the first render) the correct material is used.
+## Note (pjt) it should be possible to flag the geometry to update missing
+## attributes if switching to a more complex material.
+
+
 
 ## "Spinning"
 ## ----------------------
@@ -126,6 +130,7 @@ class GraphicsCommands
 
   fillStack: []
   strokeStack: []
+  feedbackStack: []
 
   primitiveTypes: {}
   minimumBallDetail: 2
@@ -133,6 +138,7 @@ class GraphicsCommands
   defaultBallDetail: 16
   doFill: true
   doStroke: true
+  doFeedback: false
   reflectValue: 1
   refractValue: 0.98
   currentStrokeAlpha: undefined
@@ -271,6 +277,9 @@ class GraphicsCommands
     @stroke 0xFFFFFFFF
     @defaultNormalStroke = true
 
+  resetFeedbackStack: ->
+    @feedbackStack = []
+    @doFeedback = false
 
   pushFill: (defaultNormalFill,currentFillColor,currentFillAlpha, doFill)->
     @fillStack.push defaultNormalFill
@@ -290,6 +299,11 @@ class GraphicsCommands
     @strokeStack.push currentStrokeAlpha
     @strokeStack.push doStroke
 
+  pushFeedback: (doFeedb)->
+    if @liveCodeLabCoreInstance.animationLoop.noDrawFrame
+      return
+    @feedbackStack.push doFeedb
+
   popFill: ->
     if @fillStack.length
       @doFill = @fillStack.pop()
@@ -308,6 +322,15 @@ class GraphicsCommands
     else
       @resetStrokeStack()
 
+  popFeedback: ->
+    if @liveCodeLabCoreInstance.animationLoop.noDrawFrame
+      return
+
+    if @feedbackStack.length
+      @doFeedback = @feedbackStack.pop()
+    else
+      @resetFeedbackStack()
+
   addToScope: (scope) ->
 
     scope.addInlinable('line',       (a,b,c,d) => @line(a,b,c,d))
@@ -323,10 +346,12 @@ class GraphicsCommands
     # TODO stroke size doesn't work on most GPUs
     # should eliminate and have something like wireframe on/off instead?
     scope.addFunction('strokeSize',  (a) => @strokeSize(a))
+    scope.addFunction('feedback',    (a) => @feedback(a))
+    scope.addFunction('noFeedback',  (a) => @noFeedback(a))
 
   createObjectIfNeededAndDressWithCorrectMaterial: (
     a, b, c, primitiveProperties, strokeTime, colorToBeUsed,
-    alphaToBeUsed, applyDefaultNormalColor) ->
+    alphaToBeUsed, applyDefaultNormalColor, feedbackToBeUsed) ->
 
     objectIsNew = false
     pooledObjectWithMaterials = undefined
@@ -381,6 +406,11 @@ class GraphicsCommands
         # Another workaround would be to create an object
         # for each different type of material.
         normalMaterial: undefined
+	
+        # feedback with and without lighting
+        feedbackBasicMaterial: undefined
+        feedbackLambertMaterial: undefined
+	
         threejsObject3D: (
           new primitiveProperties.threeObjectConstructor(
             @geometriesBank[primitiveID]
@@ -421,6 +451,9 @@ class GraphicsCommands
         pooledObjectWithMaterials.lineMaterial
     else if objectIsNew or (
       colorToBeUsed is @angleColor or applyDefaultNormalColor
+    ) or (
+      # needs testing / translating...
+      feedbackToBeUsed and @liveCodeLabCoreInstance.lightSystem.lightsAreOn
     )
 
       # the first time we render a an object we need to
@@ -429,6 +462,20 @@ class GraphicsCommands
       # https://github.com/mrdoob/three.js/issues/1051
       # Another workaround would be to create a pooled object
       # for each different type of material.
+      # PJT: now trying to use textures, it seems that
+      # a lit, textured material will need the biggest buffer, so...
+      if not pooledObjectWithMaterials.feedbackLambertMaterial?
+        pooledObjectWithMaterials.feedbackLambertMaterial =
+          new THREE.MeshLambertMaterial()
+      mat = pooledObjectWithMaterials.feedbackLambertMaterial
+      mat.color.setHex colorToBeUsed
+      mat.map = @threeJsSystem.feedbackMap
+      mat.blending = THREE.AdditiveBlending
+      mat.depthWrite = false
+      mat.transparent = true
+      mat.side = THREE.DoubleSide
+      pooledObjectWithMaterials.threejsObject3D.material = mat
+    else if !feedbackToBeUsed and (colorToBeUsed is @angleColor or applyDefaultNormalColor)
       if not pooledObjectWithMaterials.normalMaterial?
         pooledObjectWithMaterials.normalMaterial =
           new THREE.MeshNormalMaterial()
@@ -436,13 +483,26 @@ class GraphicsCommands
       pooledObjectWithMaterials.threejsObject3D.material =
         pooledObjectWithMaterials.normalMaterial
     else unless @liveCodeLabCoreInstance.lightSystem.lightsAreOn
-      if not pooledObjectWithMaterials.basicMaterial?
-        pooledObjectWithMaterials.basicMaterial =
-          new THREE.MeshBasicMaterial()
-        pooledObjectWithMaterials.basicMaterial.shading = THREE.FlatShading;
-      pooledObjectWithMaterials.basicMaterial.color.setHex colorToBeUsed
-      pooledObjectWithMaterials.threejsObject3D.material =
-        pooledObjectWithMaterials.basicMaterial
+      if feedbackToBeUsed
+        if not pooledObjectWithMaterials.feedbackBasicMaterial?
+          pooledObjectWithMaterials.feedbackBasicMaterial =
+            new THREE.MeshBasicMaterial()
+        mat = pooledObjectWithMaterials.feedbackBasicMaterial
+        mat.map = @threeJsSystem.feedbackMap
+        mat.color.setHex colorToBeUsed
+        mat.blending = THREE.AdditiveBlending
+        mat.depthWrite = false
+        mat.transparent = true
+        mat.side = THREE.DoubleSide
+        pooledObjectWithMaterials.threejsObject3D.material = mat
+      else
+          if not pooledObjectWithMaterials.basicMaterial?
+            pooledObjectWithMaterials.basicMaterial =
+              new THREE.MeshBasicMaterial()
+            pooledObjectWithMaterials.basicMaterial.shading = THREE.FlatShading;
+          pooledObjectWithMaterials.basicMaterial.color.setHex colorToBeUsed
+          pooledObjectWithMaterials.threejsObject3D.material =
+            pooledObjectWithMaterials.basicMaterial
     else
 
       # lights are on
@@ -644,7 +704,7 @@ class GraphicsCommands
       @createObjectIfNeededAndDressWithCorrectMaterial(
         a, b, c, primitiveProperties,
         false, @currentFillColor, @currentFillAlpha,
-        @defaultNormalFill
+        @defaultNormalFill, @doFeedback
       )
     else if (not @doFill or not primitiveProperties.canFill) and @doStroke
 
@@ -665,7 +725,7 @@ class GraphicsCommands
       @createObjectIfNeededAndDressWithCorrectMaterial(
         a, b, c, primitiveProperties, false,
         @currentFillColor, @currentFillAlpha,
-        @defaultNormalFill
+        @defaultNormalFill, @doFeedback
       )
 
     if appendedFunction? then appendedFunction()
@@ -675,6 +735,7 @@ class GraphicsCommands
 
     @resetFillStack()
     @resetStrokeStack()
+    @resetFeedbackStack()
 
     # TODO stroke size doesn't work on most GPUs
     # should eliminate and have something like wireframe on/off instead?
@@ -1030,5 +1091,26 @@ class GraphicsCommands
     else a = 0  if a < 0
     @currentStrokeSize = a
 
-module.exports = GraphicsCommands
+  feedback: (a) ->
+    if _.isFunction a then appendedFunction = a
+    if appendedFunction?
+      @pushFeedback @doFeedback
 
+    @doFeedback = true
+
+    if appendedFunction?
+      appendedFunction()
+      @popFeedback()
+
+  noFeedback: (a) ->
+    if _.isFunction a then appendedFunction = a
+    if appendedFunction?
+      @pushFeedback @doFeedback
+
+    @doFeedback = false
+
+    if appendedFunction?
+      appendedFunction()
+      @popFeedback()
+  
+module.exports = GraphicsCommands

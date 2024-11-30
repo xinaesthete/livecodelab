@@ -23,6 +23,7 @@ class ThreeJsSystem
   effectBlend: undefined # used by blend-controls
   composer: undefined # used by renderer
   scene: undefined # used by renderer, graphics commands and light commands
+  feedbackMap: undefined # used by graphics commands
 
   constructor: (canvas) ->
 

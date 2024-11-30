@@ -79,6 +79,8 @@ class CodePreprocessor
     "stroke"
     "noFill"
     "noStroke"
+    "feedback"
+    "noFeedback"
   ]
   primitives: [
     # Geometry
@@ -114,6 +116,8 @@ class CodePreprocessor
     "pointLight"
     # Server connections
     "connect"
+    # mutator
+    "mutateDir"
   ]
   colorCommands: [
     "fill"

@@ -20,6 +20,9 @@ class BlendControls
   }
   # Used for setting how much blending there is between frames
   blendAmount: 0
+  # Tweakable parameter for mixing of motionBlur
+  motionBlurAmount: 0.7
+  previousMotionBlurAmount: 0.7
   
   constructor: (@threeJsSystem) ->
 
@@ -27,21 +30,29 @@ class BlendControls
     scope.addVariable('normal',         @animationStyles.normal)
     scope.addVariable('paintOver',      @animationStyles.paintOver)
     scope.addVariable('motionBlur',     @animationStyles.motionBlur)
-    scope.addFunction('animationStyle', (a) => @animationStyle(a))
+    scope.addFunction('animationStyle', (a, b) => @animationStyle(a, b))
 
-  animationStyle: (a) ->
+  animationStyle: (a, b) ->
+    # turns out when you type normal that the first two letters "no"
+    # are sent as "false"
+    return  if a is false or not a?
     @animationStyleValue = a
+    # using the same style of check because I don't know coffeescript well enough to do something sensible / idiomatic
+    # but the bigger issue is that I seem to be getting b === undefined
+    return  if b is false or not b?
+    @motionBlurAmount = b ##nb: this is now generating "return this.motionBlurAmount = b"...
 
   animationStyleUpdateIfChanged: ->
     # Animation Style hasn't changed so we don't need to do anything
-    return  if @animationStyleValue is @previousanimationStyleValue
+    return if @animationStyleValue is @previousanimationStyleValue and @motionBlurAmount is @previousMotionBlurAmount
     @previousanimationStyleValue = @animationStyleValue
+    @previousMotionBlurAmount = @motionBlurAmount
 
     switch @animationStyleValue
         when @animationStyles.paintOver
             @threeJsSystem.effectBlend.uniforms.mixRatio.value = 1.0 
         when @animationStyles.motionBlur
-            @threeJsSystem.effectBlend.uniforms.mixRatio.value = 0.7
+            @threeJsSystem.effectBlend.uniforms.mixRatio.value = @motionBlurAmount
         when @animationStyles.normal
             @threeJsSystem.effectBlend.uniforms.mixRatio.value = 0
         else
