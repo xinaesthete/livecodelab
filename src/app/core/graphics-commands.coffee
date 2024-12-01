@@ -450,9 +450,6 @@ class GraphicsCommands
       pooledObjectWithMaterials.threejsObject3D.material =
         pooledObjectWithMaterials.lineMaterial
     else if objectIsNew or (
-      colorToBeUsed is @angleColor or applyDefaultNormalColor
-    ) or (
-      # needs testing / translating...
       feedbackToBeUsed and @liveCodeLabCoreInstance.lightSystem.lightsAreOn
     )
 
@@ -467,6 +464,8 @@ class GraphicsCommands
       if not pooledObjectWithMaterials.feedbackLambertMaterial?
         pooledObjectWithMaterials.feedbackLambertMaterial =
           new THREE.MeshLambertMaterial()
+      ## ! update 2024 - is the above issue still relevant?
+      ## would we easily be able to upgrade to a newer version of three.js?
       mat = pooledObjectWithMaterials.feedbackLambertMaterial
       mat.color.setHex colorToBeUsed
       mat.map = @threeJsSystem.feedbackMap
@@ -496,13 +495,13 @@ class GraphicsCommands
         mat.side = THREE.DoubleSide
         pooledObjectWithMaterials.threejsObject3D.material = mat
       else
-          if not pooledObjectWithMaterials.basicMaterial?
-            pooledObjectWithMaterials.basicMaterial =
-              new THREE.MeshBasicMaterial()
-            pooledObjectWithMaterials.basicMaterial.shading = THREE.FlatShading;
-          pooledObjectWithMaterials.basicMaterial.color.setHex colorToBeUsed
-          pooledObjectWithMaterials.threejsObject3D.material =
-            pooledObjectWithMaterials.basicMaterial
+        if not pooledObjectWithMaterials.basicMaterial?
+          pooledObjectWithMaterials.basicMaterial =
+            new THREE.MeshBasicMaterial()
+          pooledObjectWithMaterials.basicMaterial.shading = THREE.FlatShading;
+        pooledObjectWithMaterials.basicMaterial.color.setHex colorToBeUsed
+        pooledObjectWithMaterials.threejsObject3D.material =
+          pooledObjectWithMaterials.basicMaterial
     else
 
       # lights are on
