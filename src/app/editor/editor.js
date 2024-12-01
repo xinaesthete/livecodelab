@@ -11,6 +11,10 @@ export default class Editor {
   constructor(eventRouter, codeTextArea) {
     this.eventRouter = eventRouter;
     this.codeTextArea = codeTextArea;
+    const lastWorkingProgram = localStorage.getItem('lastWorkingProgram');
+    if (lastWorkingProgram) {      
+      codeTextArea.value = lastWorkingProgram;
+    }
     this.codemirrorInstance = CodeMirror.fromTextArea(this.codeTextArea, {
       mode: 'livecodelab',
       theme: 'night',

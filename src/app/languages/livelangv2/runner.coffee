@@ -81,7 +81,7 @@ class V2ProgramRunner
     if @consecutiveFramesWithoutRunTimeError is 5
       @lastStableProgram = @programAST
       @lastStableText = @programText
-      @eventRouter.emit("livecodelab-running-stably")
+      @eventRouter.emit("livecodelab-running-stably", @programText)
 
     if (interpreterState.doOnceTriggered)
 

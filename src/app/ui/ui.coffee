@@ -71,6 +71,9 @@ class Ui
           "background-color", ""
         )
     )
+    eventRouter.addListener("livecodelab-running-stably", (programText) ->
+      localStorage.setItem("lastWorkingProgram", programText)
+    )
 
     eventRouter.addListener("autocoderbutton-flash", ->
       $("#autocodeIndicator").fadeOut(100).fadeIn 100
