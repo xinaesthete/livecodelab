@@ -5,7 +5,9 @@
 _ = require('underscore')
 
 # This resolution is easily managed by modern graphic cards (the PS Vita can).
-IDEAL_RESOLUTION = {width: 880, height: 720}
+# IDEAL_RESOLUTION = {width: 880, height: 720}
+# shoot for the stars
+IDEAL_RESOLUTION = {width: 1920*2, height: 1080*2}
 MAX_CANVAS_SCALING = 2
 SCALE_DELTA = 0.1
 RESIZE_TRIGGER_DEBOUNCING = 250
@@ -66,6 +68,7 @@ class Canvas
     # So below the ideal resolution we show graphics on the canvas at 1 to 1.
     # At the same time, we don't want to use buffers that are bigger
     # than necessary, so we limit the buffer to the maximum we need.
+    # pjt in 2024 'we' want higher resolution :)
     maxUnscaledBuffer = @calculateMaxUnscaledBuffer(
       IDEAL_RESOLUTION,
       @maxBufferSize()

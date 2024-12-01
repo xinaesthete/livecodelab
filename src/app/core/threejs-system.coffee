@@ -41,7 +41,7 @@ class ThreeJsSystem
       # BUT setSize would duplicate the canvas
       # buffer on retina displays which is
       # somehing we want to control manually.
-      devicePixelRatio: 1
+      devicePixelRatio: window.devicePixelRatio
     })
 
 
