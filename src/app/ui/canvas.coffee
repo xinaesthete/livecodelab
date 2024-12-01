@@ -79,25 +79,28 @@ class Canvas
     # that we can accept.
     # If this buffer is bigger than the ideal resolution maximally scaled then
     # this is what will be used.
-    scaledCanvasWidth = Math.floor(window.innerWidth / MAX_CANVAS_SCALING)
-    scaledCanvasHeight = Math.floor(window.innerHeight / MAX_CANVAS_SCALING)
+    scaledCanvasWidth = Math.floor(window.innerWidth * MAX_CANVAS_SCALING)
+    scaledCanvasHeight = Math.floor(window.innerHeight *  MAX_CANVAS_SCALING)
 
     # Starting with maximum scaling, check if that buffer resolution is within
     # the acceptable limits. If it is then decrease the scaling factor and carry
     # on checking. If it's not then exit the loop and use the last acceptable
     # buffer size.
-    scaling = MAX_CANVAS_SCALING
-    while (scaling > 1)
+    # NO.
+    scaling = 1 / window.devicePixelRatio
+    # scaling = 1 
+    # scaling = MAX_CANVAS_SCALING
+    # while (scaling > 1)
 
-      sW = Math.floor(window.innerWidth / (scaling - SCALE_DELTA))
-      sH = Math.floor(window.innerHeight / (scaling - SCALE_DELTA))
+    #   sW = Math.floor(window.innerWidth / (scaling - SCALE_DELTA))
+    #   sH = Math.floor(window.innerHeight / (scaling - SCALE_DELTA))
 
-      if (sW > maxUnscaledBuffer.width || sH > maxUnscaledBuffer.height)
-        break
+    #   if (sW > maxUnscaledBuffer.width || sH > maxUnscaledBuffer.height)
+    #     break
 
-      scaledCanvasWidth = sW
-      scaledCanvasHeight = sH
-      scaling -= SCALE_DELTA;
+    #   scaledCanvasWidth = sW
+    #   scaledCanvasHeight = sH
+    #   scaling -= SCALE_DELTA;
 
     return {
       width: scaledCanvasWidth,
