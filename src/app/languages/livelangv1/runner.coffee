@@ -29,6 +29,10 @@ class ProgramRunner
   # note that it might be impossible to run it because of errors, in which case
   # LiveCodeLab might be running an older version.
   currentCodeString = ""
+
+  # pjt - different from the original design, perhaps this class isn't necessarily
+  # the place for this, but we use it to emit what the stable code is.
+  lastStableCodeString = ""
   
   constructor: (@eventRouter, @codeCompiler, @globalScope) ->
 
@@ -69,9 +73,10 @@ class ProgramRunner
     @drawFunction = () -> {}
     @lastStableProgram = () -> {}
 
-  setProgram: (drawFunc) ->
+  setProgram: (drawFunc, userCode) ->
     @consecutiveFramesWithoutRunTimeError = 0
     @drawFunction = drawFunc
+    @currentCodeString = userCode
 
   resetTrackingOfDoOnceOccurrences: ->
     @doOnceOccurrencesLineNumbers = []
@@ -101,7 +106,8 @@ class ProgramRunner
     @consecutiveFramesWithoutRunTimeError += 1
     if @consecutiveFramesWithoutRunTimeError is 5
       @lastStableProgram = @drawFunction
-      @eventRouter.emit("livecodelab-running-stably")
+      @lastStableCodeString = @currentCodeString
+      @eventRouter.emit("livecodelab-running-stably", @currentCodeString)
 
   runLastWorkingProgram: ->
     # mark the program as flawed and register the previous stable one.

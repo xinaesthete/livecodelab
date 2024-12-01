@@ -11,8 +11,9 @@ export default class Editor {
   constructor(eventRouter, codeTextArea) {
     this.eventRouter = eventRouter;
     this.codeTextArea = codeTextArea;
+    // this isn't exactly the right way to do this, the rest of the system won't be initialized properly
     const lastWorkingProgram = localStorage.getItem('lastWorkingProgram');
-    if (lastWorkingProgram) {      
+    if (lastWorkingProgram && lastWorkingProgram !== "undefined") {
       codeTextArea.value = lastWorkingProgram;
     }
     this.codemirrorInstance = CodeMirror.fromTextArea(this.codeTextArea, {
