@@ -49,6 +49,7 @@
   },
   "dependencies": {
     "buzz": "1.2.1",
+    "dat.gui": "^0.7.9",
     "underscore": "1.9.1"
   },
   "volta": {
